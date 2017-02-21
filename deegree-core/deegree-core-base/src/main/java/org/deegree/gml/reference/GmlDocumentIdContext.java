@@ -173,24 +173,30 @@ public class GmlDocumentIdContext implements GMLReferenceResolver {
     }
 
     private GMLObject fetchExternalGmlObject( String uri, String baseURL ) {
-        GMLObject object = null;
-        try {
-            URL resolvedURL = null;
-            if ( baseURL != null ) {
-                resolvedURL = new URL( new URL( baseURL ), uri );
-            } else {
-                resolvedURL = new URL( uri );
+        boolean doExternalGmlObjectResolving = false;
+        // TODO move value to configuration or better configure which URIs should be resolved, e.g. INSPIRE code list values usually do not need to be resolved)
+        if ( doExternalGmlObjectResolving ) {
+            GMLObject object = null;
+            try {
+                URL resolvedURL = null;
+                if ( baseURL != null ) {
+                    resolvedURL = new URL( new URL( baseURL ), uri );
+                } else {
+                    resolvedURL = new URL( uri );
+                }
+                GMLStreamReader gmlReader = createGMLStreamReader( version, resolvedURL );
+                gmlReader.setApplicationSchema( schema );
+                object = gmlReader.read();
+                gmlReader.close();
+                LOG.debug( "Read GML object: id='" + object.getId() + "'" );
+            } catch ( Throwable e ) {
+                String msg = "Unable to resolve external object reference to '" + uri + "': " + e.getMessage();
+                throw new ReferenceResolvingException( msg );
             }
-            GMLStreamReader gmlReader = createGMLStreamReader( version, resolvedURL );
-            gmlReader.setApplicationSchema( schema );
-            object = gmlReader.read();
-            gmlReader.close();
-            LOG.debug( "Read GML object: id='" + object.getId() + "'" );
-        } catch ( Throwable e ) {
-            String msg = "Unable to resolve external object reference to '" + uri + "': " + e.getMessage();
-            throw new ReferenceResolvingException( msg );
+            return object;
+        } else {
+            throw new ReferenceResolvingException( "external object reference validation is disabled" );
         }
-        return object;
     }
 
     /**
