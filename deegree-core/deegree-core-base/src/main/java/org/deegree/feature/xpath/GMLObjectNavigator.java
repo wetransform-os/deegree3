@@ -253,6 +253,9 @@ class GMLObjectNavigator extends DefaultNavigator {
                 iter = xpathNodes.iterator();
             } else {
                 Object propValue = prop.getValue();
+                if(propValue == null ){
+                    return null;
+                }
                 if ( propValue instanceof GMLObject ) {
                     GMLObject castNode = (GMLObject) propValue;
                     iter = new SingleObjectIterator( new GMLObjectNode<GMLObject, Property>( propNode, castNode ) );
