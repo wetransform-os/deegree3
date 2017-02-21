@@ -118,9 +118,10 @@ public class JAXBUtils {
             LOG.error( "Unable to instantiate JAXBContext for package '{}'", jaxbPackage );
             throw e;
         }
-
+        
+        boolean performValidation=false; // TODO read value from configuration or support validation with local schema locations
         Unmarshaller u = jc.createUnmarshaller();
-        if ( schemaLocation != null ) {
+        if ( schemaLocation != null && performValidation ) {
             Schema configSchema = getSchemaForUrl( schemaLocation );
             if ( configSchema != null ) {
                 u.setSchema( configSchema );
