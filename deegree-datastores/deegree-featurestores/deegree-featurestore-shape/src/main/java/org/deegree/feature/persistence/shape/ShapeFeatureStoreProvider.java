@@ -183,14 +183,14 @@ public class ShapeFeatureStoreProvider implements FeatureStoreProvider {
         return new Class[] {};
     }
 
-    static class Mapping {
+    public static class Mapping {
         String fieldname;
 
         String propname;
 
         boolean index;
 
-        Mapping( String fieldname, String propname, boolean index ) {
+        public Mapping( String fieldname, String propname, boolean index ) {
             this.fieldname = fieldname;
             this.propname = propname;
             this.index = index;
