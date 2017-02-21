@@ -245,7 +245,7 @@ class WmsCapabilities130ThemeWriter {
         }
         writer.writeStartElement( WMSNS, "MetadataURL" );
         writer.writeAttribute( "type", "ISO19115:2003" );
-        writeElement( writer, WMSNS, "Format", "application/xml" );
+        writeElement( writer, WMSNS, "Format", "text/xml" ); // according example given in OGC-WMS-1.30 specification page 82   
         writer.writeStartElement( WMSNS, "OnlineResource" );
         writer.writeAttribute( XLNNS, "type", "simple" );
         writer.writeAttribute( XLNNS, "href", url );

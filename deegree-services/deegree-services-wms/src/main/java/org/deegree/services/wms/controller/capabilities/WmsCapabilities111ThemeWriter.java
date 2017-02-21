@@ -243,8 +243,8 @@ class WmsCapabilities111ThemeWriter {
     private void writeMetadataUrl( XMLStreamWriter writer, String url )
                             throws XMLStreamException {
         writer.writeStartElement( "MetadataURL" );
-        writer.writeAttribute( "type", "TC211" );
-        writeElement( writer, "Format", "application/xml" );
+        writer.writeAttribute( "type", "TC211" );  
+        writeElement( writer, "Format", "text/xml" ); // no format explicit specified in OGC-WMS-1.1.1 but 'text/xml' given in OGC-WMS-1.3.0 example on page 82
         writer.writeStartElement( "OnlineResource" );
         writer.writeNamespace( XLINK_PREFIX, XLNNS );
         writer.writeAttribute( XLNNS, "type", "simple" );
