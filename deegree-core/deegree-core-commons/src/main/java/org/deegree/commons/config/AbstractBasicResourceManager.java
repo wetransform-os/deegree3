@@ -77,6 +77,10 @@ public abstract class AbstractBasicResourceManager implements ResourceManager {
         this.dir = resourceDir;
     }
 
+    public File getBaseDir() {
+        return dir;
+    }
+
     protected abstract ResourceProvider getProvider( URL url );
 
     protected abstract void remove( String id );

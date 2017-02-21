@@ -1083,6 +1083,7 @@ public class OGCFrontController extends HttpServlet {
             LOG.info( "" );
 
             initWorkspace();
+            DeegreeWorkspaceUpdater.INSTANCE.init( workspace );
 
         } catch ( NoClassDefFoundError e ) {
             LOG.error( "Initialization failed!" );
@@ -1191,11 +1192,18 @@ public class OGCFrontController extends HttpServlet {
      */
     public void reload()
                             throws IOException, URISyntaxException, ServletException {
-        destroyWorkspace();
-        try {
-            initWorkspace();
-        } catch ( ResourceInitException e ) {
-            throw new ServletException( e.getLocalizedMessage(), e.getCause() );
+        if ( DeegreeWorkspaceUpdater.INSTANCE.isWorkspaceChange(getActiveWorkspace()) ) {
+            // do complete reload
+            destroyWorkspace();
+            try {
+                initWorkspace();
+            } catch ( ResourceInitException e ) {
+                throw new ServletException( e.getLocalizedMessage(), e.getCause() );
+            }
+            DeegreeWorkspaceUpdater.INSTANCE.notifyWorkspaceChange( workspace );
+        } else {
+            // no complete reload - update only
+            DeegreeWorkspaceUpdater.INSTANCE.updateWorkspace( workspace );
         }
     }
 

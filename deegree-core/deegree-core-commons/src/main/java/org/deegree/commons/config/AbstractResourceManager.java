@@ -45,7 +45,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -351,4 +350,42 @@ public abstract class AbstractResourceManager<T extends Resource> extends Abstra
         }
         return state;
     }
+
+    public void updateResourceConfig( String id, File configLocation ) {
+        final boolean isKnown = idToState.containsKey( id );
+        final boolean configExists = configLocation.exists();
+        if ( !isKnown ) // unknown ...
+        {
+            if ( configExists ) {
+                // new resource
+                addResourceConfig( id, configLocation );
+            } else {
+                // nothing to do
+            }
+        } else // known ...
+        {
+            if ( configExists ) {
+                // modified : remove and add again
+                remove( id );
+                addResourceConfig( id, configLocation );
+            } else {
+                // removed
+                remove( id );
+            }
+        }
+
+    }
+
+    private void addResourceConfig( String id, File configLocation ) {
+        try {
+
+            final ResourceState<T> state = processResourceConfig( configLocation );
+            if ( state != null ) {
+                idToState.put( state.getId(), state );
+            }
+        } catch ( Exception e ) {
+            LOG.error( "unable to process config: " + configLocation.toURI().toString(), e );
+        }
+    }
+    
 }
