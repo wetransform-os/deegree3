@@ -6,7 +6,7 @@ LABEL description="deegree ows services based on https://github.com/wetransform-
 
 EXPOSE 8080
 
-# set default secrets ( overwrite for production use!)
+# set default secrets ( overwrite for production use! )
 
 # consoleSecretKey="deegree"
 ENV consoleSecretKey=000001544E797221:564344F65B8F9DDBA6A410E461E7801E10955F56D8679284966F400C68B6CEAB 
