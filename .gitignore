@@ -1,6 +1,7 @@
 target
 .classpath
 .project
+!deegree-docker/.project
 .settings
 
 *.iml
