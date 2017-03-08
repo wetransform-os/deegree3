@@ -223,7 +223,7 @@ public class Features {
                     try {
                         node = ( (Reference<?>) node ).getReferencedObject();
                     } catch ( ReferenceResolvingException e ) {
-                        LOG.warn( "Unable to resolve external reference '" + ref.getURI() + ". Ignoring." );
+                        LOG.debug( "Unable to resolve external reference '" + ref.getURI() + ". Ignoring." );
                         return;
                     }
                 }
