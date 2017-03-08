@@ -109,7 +109,16 @@ public class OWS110ExceptionReportSerializer extends XMLExceptionSerializer {
             writer.writeAttribute( "locator", ex.getLocator() );
         }
         writer.writeStartElement( OWS_NS, "ExceptionText" );
-        writer.writeCharacters( ex.getMessage() );
+        String message = ex.getMessage();
+        if(message==null){
+            message=ex.getExceptionCode();
+        }
+        if(message!=null){
+            writer.writeCharacters( message);
+        }else{
+            writer.writeCharacters( "no message");
+        }
+        
         writer.writeEndElement();
         writer.writeEndElement(); // Exception
         writer.writeEndElement(); // ExceptionReport
