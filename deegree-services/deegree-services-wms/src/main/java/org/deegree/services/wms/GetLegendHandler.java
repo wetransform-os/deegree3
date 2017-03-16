@@ -50,6 +50,7 @@ import static org.deegree.style.utils.ImageUtils.postprocessPng8bit;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.deegree.commons.utils.Pair;
 import org.deegree.layer.LayerRef;
@@ -123,11 +124,27 @@ class GetLegendHandler {
     }
 
     private Style findLegendStyle( LayerRef layer, StyleRef styleRef ) {
-        Style style;
+        Style style = null;
         if ( service.isNewStyle() ) {
-            style = service.themeMap.get( layer.getName() ).getMetadata().getLegendStyles().get( styleRef.getName() );
+            final Map<String, Style> legendStyles = service.themeMap.get( layer.getName() ).getMetadata().getLegendStyles();
+            if ( !legendStyles.isEmpty() ) {
+                if ( styleRef.getName() == null || styleRef.getName().isEmpty() ) {
+                    // use first available style as default style if no explicit style is requested
+                    style = legendStyles.values().iterator().next();
+                } else {
+                    style = legendStyles.get( styleRef.getName() );
+                }
+            }
             if ( style == null ) {
-                style = service.themeMap.get( layer.getName() ).getMetadata().getStyles().get( styleRef.getName() );
+                final Map<String, Style> layerStyles = service.themeMap.get( layer.getName() ).getMetadata().getStyles();
+                if ( !layerStyles.isEmpty() ) {
+                    if ( styleRef.getName() == null || styleRef.getName().isEmpty() ) {
+                        // use first available style as default style if no explicit style is requested
+                        style = layerStyles.values().iterator().next();
+                    } else {
+                        style = layerStyles.get( styleRef.getName() );
+                    }
+                }
             }
         } else {
             style = service.registry.getLegendStyle( layer.getName(), styleRef.getName() );
