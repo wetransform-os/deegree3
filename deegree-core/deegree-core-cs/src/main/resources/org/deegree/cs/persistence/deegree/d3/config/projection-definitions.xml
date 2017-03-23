@@ -10799,6 +10799,7 @@
 		<crs:FalseEasting>0.0</crs:FalseEasting>
 		<crs:FalseNorthing>0.0</crs:FalseNorthing>
 	</crs:Mercator>
+	<!-- 
   <crs:TransverseMercator>
     <crs:Id>epsg:19851</crs:Id>
     <crs:Name>Croatia Transverse Mercator</crs:Name>
@@ -10808,4 +10809,5 @@
     <crs:FalseEasting>500000.0</crs:FalseEasting>
     <crs:FalseNorthing>0.0</crs:FalseNorthing>
   </crs:TransverseMercator>  
+	 -->
 </crs:ProjectionDefinitions>
