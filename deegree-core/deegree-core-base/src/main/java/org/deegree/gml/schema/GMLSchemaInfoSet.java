@@ -123,7 +123,15 @@ import org.w3c.dom.ls.LSInput;
  * @version $Revision:$, $Date:$
  */
 public class GMLSchemaInfoSet extends XMLSchemaInfoSet {
-
+    
+    final static List<String> NS_WITH_GENERIC_FEATURECOLLECTIONS = new ArrayList<String>();
+ 
+    static {
+        NS_WITH_GENERIC_FEATURECOLLECTIONS.add( CommonNamespaces.GML3_2_NS);
+        NS_WITH_GENERIC_FEATURECOLLECTIONS.add(CommonNamespaces.CRSNS);
+        NS_WITH_GENERIC_FEATURECOLLECTIONS.add("http://www.opengis.net/wfs/2.0");
+    }
+    
     private static final Logger LOG = LoggerFactory.getLogger( GMLSchemaInfoSet.class );
 
     private static final String GML_PRE_32_NS = CommonNamespaces.GMLNS;
@@ -522,6 +530,21 @@ public class GMLSchemaInfoSet extends XMLSchemaInfoSet {
      * @return true, if the given element declaration is a feature collection, false otherwise
      */
     private boolean isGML32FeatureCollection( XSElementDeclaration featureDecl ) {
+        
+        // several parts of deegree code treat feature collections different from normal feature, e.g. assume to be a container element in WFS transaction requests. 
+        // This is problematic if the feature collection is an custom application type element, so only elements of well known namespace will be treated as fc...   
+        final String targetNS = featureDecl.getNamespace();
+        boolean match=false;
+        for(String ns:NS_WITH_GENERIC_FEATURECOLLECTIONS){
+            if(ns.equals( targetNS)){
+                match=true;
+                break;
+            }
+        }
+        if(!match){
+            return false;
+        }
+        
         XSComplexTypeDecl type = (XSComplexTypeDecl) featureDecl.getTypeDefinition();
         List<XSElementDeclaration> propDecls = getPropertyDecls( type );
         for ( XSElementDeclaration propDecl : propDecls ) {
