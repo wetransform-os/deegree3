@@ -427,7 +427,9 @@ class TransactionHandler {
         gmlStream.setApplicationSchema( schema );
         gmlStream.setDefaultCRS( defaultCRS );
 
-        if ( new QName( WFS_NS, "FeatureCollection" ).equals( xmlStream.getName() ) ) {
+        if ( new QName( WFS_NS, "FeatureCollection" ).equals( xmlStream.getName() )// 
+             ||new QName( WFS_200_NS, "FeatureCollection" ).equals( xmlStream.getName() )
+           ) {
             LOG.debug( "Features embedded in wfs:FeatureCollection" );
             fc = parseWFSFeatureCollection( xmlStream, gmlStream );
             // skip to wfs:Insert END_ELEMENT
@@ -454,7 +456,7 @@ class TransactionHandler {
         }
 
         // resolve local xlink references
-        gmlStream.getIdContext().resolveLocalRefs();
+// disabled       gmlStream.getIdContext().resolveLocalRefs();
 
         return fc;
     }
