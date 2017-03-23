@@ -259,7 +259,7 @@ public class StreamFeatureCollection implements FeatureInputStream {
                 try {
                     next = read();
                 } catch ( IOException e ) {
-                    throw new RuntimeException();
+                    throw new RuntimeException(e);
                 }
                 return currentFeature;
             }

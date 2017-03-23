@@ -195,7 +195,9 @@ public class GmlDocumentIdContext implements GMLReferenceResolver {
             }
             return object;
         } else {
-            throw new ReferenceResolvingException( "external object reference validation is disabled" );
+//            throw new ReferenceResolvingException( "external object reference validation is disabled" );
+            LOG.debug( "external object reference validation is disabled" );
+            return null;
         }
     }
 

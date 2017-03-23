@@ -10773,6 +10773,24 @@
 		<crs:FalseEasting>0.0</crs:FalseEasting>
 		<crs:FalseNorthing>0.0</crs:FalseNorthing>
 	</crs:Mercator>
+  	<crs:Mercator>
+		<crs:Id>epsg:3856</crs:Id>
+		<crs:Name>Pseudo-Mercator</crs:Name>
+		<crs:LatitudeOfNaturalOrigin>0.0</crs:LatitudeOfNaturalOrigin>
+		<crs:LongitudeOfNaturalOrigin>0.0</crs:LongitudeOfNaturalOrigin>
+		<crs:ScaleFactor>1.0</crs:ScaleFactor>
+		<crs:FalseEasting>0.0</crs:FalseEasting>
+		<crs:FalseNorthing>0.0</crs:FalseNorthing>
+	</crs:Mercator>
+	<crs:Mercator>
+		<crs:Id>epsg:3856</crs:Id>
+		<crs:Name>Pseudo-Mercator</crs:Name>
+		<crs:LatitudeOfNaturalOrigin>0.0</crs:LatitudeOfNaturalOrigin>
+		<crs:LongitudeOfNaturalOrigin>0.0</crs:LongitudeOfNaturalOrigin>
+		<crs:ScaleFactor>1.0</crs:ScaleFactor>
+		<crs:FalseEasting>0.0</crs:FalseEasting>
+		<crs:FalseNorthing>0.0</crs:FalseNorthing>
+	</crs:Mercator>
 	<crs:Mercator>
 		<crs:Id>projection_for_epsg:900913</crs:Id>
 		<crs:LatitudeOfNaturalOrigin>0.0</crs:LatitudeOfNaturalOrigin>
@@ -10781,6 +10799,7 @@
 		<crs:FalseEasting>0.0</crs:FalseEasting>
 		<crs:FalseNorthing>0.0</crs:FalseNorthing>
 	</crs:Mercator>
+	<!-- 
   <crs:TransverseMercator>
     <crs:Id>epsg:19851</crs:Id>
     <crs:Name>Croatia Transverse Mercator</crs:Name>
@@ -10790,4 +10809,5 @@
     <crs:FalseEasting>500000.0</crs:FalseEasting>
     <crs:FalseNorthing>0.0</crs:FalseNorthing>
   </crs:TransverseMercator>  
+	 -->
 </crs:ProjectionDefinitions>
