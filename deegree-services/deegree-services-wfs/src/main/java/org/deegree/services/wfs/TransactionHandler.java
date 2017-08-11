@@ -474,9 +474,12 @@ class TransactionHandler {
             }
         }
 
-        // resolve local xlink references
-        //XXX disable checking local references
-        // gmlStream.getIdContext().resolveLocalRefs();
+        //XXX disable checking local references (only for mode UseExisting)
+        boolean skipResolving = true; // emulates configuration setting
+        if (!skipResolving || !idGenMode.equals( IDGenMode.USE_EXISTING )) {
+            // resolve local xlink references
+            gmlStream.getIdContext().resolveLocalRefs();
+        }
 
         return fc;
     }
