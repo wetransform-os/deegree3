@@ -475,7 +475,8 @@ class TransactionHandler {
         }
 
         // resolve local xlink references
-        gmlStream.getIdContext().resolveLocalRefs();
+        //XXX disable checking local references
+        // gmlStream.getIdContext().resolveLocalRefs();
 
         return fc;
     }
