@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends default-jdk mav
   mvn install -DskipTests && \
   cp /build/deegree-services/deegree-webservices/target/deegree-webservices-*.war /usr/local/tomcat/webapps/ROOT.war && \
   cd / && \
-  rm -r /build/ && \
+  rm -r /build/ && rm -r /root/.m2 \
   apt-get purge -y --auto-remove default-jdk maven && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
