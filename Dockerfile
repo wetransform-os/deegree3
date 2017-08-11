@@ -1,5 +1,29 @@
+FROM java:7-jdk as builder
+# Multi stage build - https://docs.docker.com/engine/userguide/eng-image/multistage-build/
+
+# install maven
+RUN apt-get update && apt-get install -y --no-install-recommends maven
+
+# build and extract deegree
+RUN mkdir /build && mkdir /target
+COPY ./ /build/
+RUN cd /build/ && \
+  mvn clean install -DskipTests && \
+  cp /build/deegree-services/deegree-webservices/target/deegree-webservices-*.war /build/deegree-webservices.war && \
+  unzip -o /build/deegree-webservices.war -d /target
+
+# add to image...
 FROM tomcat:8.0-jre7
 ENV LANG en_US.UTF-8
+
+# add build info - see hooks/build and http://label-schema.org/
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+LABEL org.label-schema.build-date=$BUILD_DATE \
+  org.label-schema.vcs-url=$VCS_URL \
+  org.label-schema.vcs-ref=$VCS_REF \
+  org.label-schema.schema-version="1.0.0-rc1"
 
 EXPOSE 8080
 
@@ -10,22 +34,9 @@ ENV apiUser=deegree
 ENV apiPass=deegree
 
 RUN mkdir /root/.deegree && \
-  mkdir /build && \
   rm -r /usr/local/tomcat/webapps/ROOT
 
-COPY ./ /build/
-
-# build deegree, extract it and clean up
-RUN apt-get update && apt-get install -y --no-install-recommends default-jdk maven && \
-  cd /build/ && \
-  mvn clean install -DskipTests && \
-  cp /build/deegree-services/deegree-webservices/target/deegree-webservices-*.war /usr/local/tomcat/webapps/ROOT.war && \
-  cd / && \
-  mkdir /usr/local/tomcat/webapps/ROOT && \
-  unzip -o /usr/local/tomcat/webapps/ROOT.war -d /usr/local/tomcat/webapps/ROOT && \
-  rm -r /build/ && rm -r /root/.m2 && rm /usr/local/tomcat/webapps/ROOT.war && \
-  apt-get purge -y --auto-remove default-jdk maven && \
-  apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /target /usr/local/tomcat/webapps/ROOT
 
 #cmd:
 # 1. configure deegreeapi access
