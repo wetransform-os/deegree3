@@ -475,7 +475,7 @@ class TransactionHandler {
         }
 
         //XXX disable checking local references (only for mode UseExisting)
-        boolean skipResolving = true; // emulates configuration setting
+        final boolean skipResolving = true; // emulates configuration setting
         if (!skipResolving || !idGenMode.equals( IDGenMode.USE_EXISTING )) {
             // resolve local xlink references
             gmlStream.getIdContext().resolveLocalRefs();

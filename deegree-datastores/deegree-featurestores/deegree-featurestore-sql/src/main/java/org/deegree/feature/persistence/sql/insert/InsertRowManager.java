@@ -301,6 +301,9 @@ public class InsertRowManager {
                                  List<InsertRow> additionalRows )
                             throws FilterEvaluationException, FeatureStoreException {
 
+        //XXX disable checking local references (only for mode UseExisting)
+        final boolean skipResolving = true; // emulates configuration setting
+
         List<TableJoin> jc = mapping.getJoinedTable();
         if ( jc != null ) {
             if ( jc.size() != 1 ) {
@@ -348,9 +351,11 @@ public class InsertRowManager {
                 Feature feature = (Feature) getPropValue( value );
                 if ( feature instanceof FeatureReference ) {
                     FeatureReference featureReference = (FeatureReference) feature;
-                    if ( ( featureReference.isLocal() || featureReference.isResolved() )
-                         && !featureReference.isInternalResolved() ) {
-                        subFeatureRow = lookupFeatureRow( feature.getId() );
+                    if (!skipResolving || !idGenMode.equals( IDGenMode.USE_EXISTING )) { //XXX
+                        if ( ( featureReference.isLocal() || featureReference.isResolved() )
+                             && !featureReference.isInternalResolved() ) {
+                            subFeatureRow = lookupFeatureRow( feature.getId() );
+                        }
                     }
                     // always use the uri if href is mapped explicitly
                     href = featureReference.getURI();
