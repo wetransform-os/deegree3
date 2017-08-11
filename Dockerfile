@@ -11,17 +11,19 @@ ENV apiPass=deegree
 
 RUN mkdir /root/.deegree && \
   mkdir /build && \
-  rm -r /usr/local/tomcat/webapps/ROOT   
+  rm -r /usr/local/tomcat/webapps/ROOT
 
 COPY ./ /build/
 
-# build deegree
+# build deegree, extract it and clean up
 RUN apt-get update && apt-get install -y --no-install-recommends default-jdk maven && \
   cd /build/ && \
   mvn install -DskipTests && \
   cp /build/deegree-services/deegree-webservices/target/deegree-webservices-*.war /usr/local/tomcat/webapps/ROOT.war && \
   cd / && \
-  rm -r /build/ && rm -r /root/.m2 && \
+  mkdir /usr/local/tomcat/webapps/ROOT && \
+  unzip -o /usr/local/tomcat/webapps/ROOT.war -d /usr/local/tomcat/webapps/ROOT && \
+  rm -r /build/ && rm -r /root/.m2 && rm /usr/local/tomcat/webapps/ROOT.war && \
   apt-get purge -y --auto-remove default-jdk maven && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
