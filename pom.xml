@@ -27,6 +27,18 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <!-- not sure why there are errors downloading artifacts with Maven inside Docker,
+         using the Artifactory proxying the deegree repo below seems to work -->
+    <repository>
+      <id>wetransform-repo</id>
+      <url>https://artifactory.wetransform.to/artifactory/deegree</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <distributionManagement>
