@@ -41,6 +41,7 @@
   </repositories>
 
   <distributionManagement>
+    <!--
     <repository>
       <id>deegree-releases</id>
       <url>http://repo.deegree.org/content/repositories/releases/</url>
@@ -49,6 +50,7 @@
       <id>deegree-snapshots</id>
       <url>http://repo.deegree.org/content/repositories/snapshots/</url>
     </snapshotRepository>
+    -->
     <site>
       <id>apidoc.deegree.org</id>
 <!--
@@ -56,6 +58,14 @@
 -->
       <url>file:///tmp/site/${project.version}/</url>
     </site>
+    <repository>
+      <id>wetf-releases</id>
+      <url>https://artifactory.wetransform.to/artifactory/deegree-release-local</url>
+    </repository>
+    <snapshotRepository>
+      <id>wetf-snapshots</id>
+      <url>https://artifactory.wetransform.to/artifactory/deegree-snapshot-local</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <prerequisites>
