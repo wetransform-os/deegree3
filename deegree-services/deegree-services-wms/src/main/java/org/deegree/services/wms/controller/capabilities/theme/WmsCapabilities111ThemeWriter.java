@@ -378,7 +378,7 @@ public class WmsCapabilities111ThemeWriter {
                 writer.writeAttribute( "type", url.getType() );
             }
             if ( url.getFormat() == null ) {
-                writeElement( writer, "Format", "application/xml" );
+                writeElement( writer, "Format", "text/xml" ); // no format explicitly specified in OGC WMS 1.1.1 IS but 'text/xml' given in OGC WMS 1.3.0 IS example on page 82
             } else {
                 writeElement( writer, "Format", url.getFormat() );
             }
