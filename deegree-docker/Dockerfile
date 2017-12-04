@@ -13,15 +13,22 @@ ENV consoleSecretKey=000001544E797221:564344F65B8F9DDBA6A410E461E7801E10955F56D8
 ENV apiUser=deegree
 ENV apiPass=deegree
 
+# 1. create workspace dir
+# 2. create app schemas dir
+# 3. remove standard ROOT application
 RUN mkdir /root/.deegree \
+    && mkdir -p /root/deegree/ws_production/appschemas \
     && rm -r /usr/local/tomcat/webapps/ROOT   
 
 COPY ./deegree-webservices.war /usr/local/tomcat/webapps/ROOT.war
-    
+ 
 #cmd:
-# 1. configure deegreeapi access
-# 2. configure console access
-# 3. start tomcat
-CMD  sed -i '44i <user username="'"$apiUser"'" password="'"$apiPasswd"'" roles="deegree" \/> /' /usr/local/tomcat/conf/tomcat-users.xml\ 
-     && echo $consoleSecretKey >/root/.deegree/console.pw \
-     && /usr/local/tomcat/bin/catalina.sh run
+# 1. configure schemas directory mapping
+# 2. configure deegreeapi access
+# 3. configure console access
+# 4. start tomcat
+
+CMD sed -i 's/.*<\/Host>/<Context docBase="\/root\/.deegree\/ws_production\/appschemas" path="\/schemas"\/>  <\/Host>/' /usr/local/tomcat/conf/server.xml \
+	&& sed -i 's/.*<\/tomcat-users>/<user username="'"$apiUser"'" password="'"$apiPasswd"'" roles="deegree" \/> <\/tomcat-users>/' /usr/local/tomcat/conf/tomcat-users.xml \ 
+	&& echo $consoleSecretKey >/root/.deegree/console.pw \
+	&& /usr/local/tomcat/bin/catalina.sh run
