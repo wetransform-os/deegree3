@@ -30,5 +30,5 @@ COPY ./deegree-webservices.war /usr/local/tomcat/webapps/ROOT.war
 CMD sed -i 's/.*<\/Host>/<Context docBase="\/root\/.deegree\/ws_production\/appschemas" path="\/schemas"\/>  <\/Host>/' /usr/local/tomcat/conf/server.xml \
 	&& sed -i 's/.*<\/tomcat-users>/<user username="'"$apiUser"'" password="'"$apiPasswd"'" roles="deegree" \/> <\/tomcat-users>/' /usr/local/tomcat/conf/tomcat-users.xml \ 
 	&& echo $consoleSecretKey >/root/.deegree/console.pw \
-    && mkdir -p /root/deegree/ws_production/appschemas \
+    && mkdir -p /root/.deegree/ws_production/appschemas \
 	&& /usr/local/tomcat/bin/catalina.sh run
