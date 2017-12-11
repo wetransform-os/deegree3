@@ -17,7 +17,6 @@ ENV apiPass=deegree
 # 2. create app schemas dir
 # 3. remove standard ROOT application
 RUN mkdir /root/.deegree \
-    && mkdir -p /root/deegree/ws_production/appschemas \
     && rm -r /usr/local/tomcat/webapps/ROOT   
 
 COPY ./deegree-webservices.war /usr/local/tomcat/webapps/ROOT.war
@@ -31,4 +30,5 @@ COPY ./deegree-webservices.war /usr/local/tomcat/webapps/ROOT.war
 CMD sed -i 's/.*<\/Host>/<Context docBase="\/root\/.deegree\/ws_production\/appschemas" path="\/schemas"\/>  <\/Host>/' /usr/local/tomcat/conf/server.xml \
 	&& sed -i 's/.*<\/tomcat-users>/<user username="'"$apiUser"'" password="'"$apiPasswd"'" roles="deegree" \/> <\/tomcat-users>/' /usr/local/tomcat/conf/tomcat-users.xml \ 
 	&& echo $consoleSecretKey >/root/.deegree/console.pw \
+    && mkdir -p /root/deegree/ws_production/appschemas \
 	&& /usr/local/tomcat/bin/catalina.sh run
