@@ -384,6 +384,11 @@ public class DBFReader {
                 }
                 int year = Integer.valueOf( val );
                 int month = Integer.valueOf( new String( bs, 4, 2 ) );
+
+                // DBF provides month 1-12, but GregorianCalendar use month 0-11  
+                if ( month > 0 ) {
+                    month--;
+                }
                 int day = Integer.valueOf( new String( bs, 6, 2 ) );
                 Calendar cal = new GregorianCalendar( year, month, day );
                 PrimitiveType pt = field.propertyType.getPrimitiveType();
