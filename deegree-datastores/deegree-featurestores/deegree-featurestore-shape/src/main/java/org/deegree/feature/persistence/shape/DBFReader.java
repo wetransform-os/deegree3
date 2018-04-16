@@ -390,6 +390,10 @@ public class DBFReader {
                     month--;
                 }
                 int day = Integer.valueOf( new String( bs, 6, 2 ) );
+                // 'null' values in dbf occur as year=0, month=0, day=0 
+                if(year==0 && month==0 && day==0){
+                    continue;
+                }
                 Calendar cal = new GregorianCalendar( year, month, day );
                 PrimitiveType pt = field.propertyType.getPrimitiveType();
                 PrimitiveValue pv = new PrimitiveValue( new Date( cal, true ), pt );
