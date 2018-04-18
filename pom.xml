@@ -26,9 +26,22 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <!-- not sure why there are errors downloading artifacts with Maven inside Docker,
+         using the Artifactory proxying the deegree repo below seems to work -->
+    <repository>
+      <id>wetransform-repo</id>
+      <url>https://artifactory.wetransform.to/artifactory/deegree</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <distributionManagement>
+    <!--
     <repository>
       <id>deegree-releases</id>
       <url>http://repo.deegree.org/content/repositories/releases/</url>
@@ -37,6 +50,7 @@
       <id>deegree-snapshots</id>
       <url>http://repo.deegree.org/content/repositories/snapshots/</url>
     </snapshotRepository>
+    -->
     <site>
       <id>apidoc.deegree.org</id>
 <!--
@@ -44,6 +58,14 @@
 -->
       <url>file:///tmp/site/${project.version}/</url>
     </site>
+    <repository>
+      <id>wetf-releases</id>
+      <url>https://artifactory.wetransform.to/artifactory/deegree-release-local</url>
+    </repository>
+    <snapshotRepository>
+      <id>wetf-snapshots</id>
+      <url>https://artifactory.wetransform.to/artifactory/deegree-snapshot-local</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <prerequisites>
