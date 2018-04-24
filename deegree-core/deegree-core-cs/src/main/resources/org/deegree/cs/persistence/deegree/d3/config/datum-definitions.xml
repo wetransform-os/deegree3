@@ -218,6 +218,13 @@
       <crs:UsedPrimeMeridian>urn:opengis:def:crs:epsg::8901</crs:UsedPrimeMeridian>
     </crs:GeodeticDatum>
     <crs:GeodeticDatum>
+      <crs:Id>epsg:6150</crs:Id>
+      <crs:Name>CH1903+</crs:Name>
+      <crs:Version>2001-11-06</crs:Version>
+      <crs:UsedEllipsoid>http://www.opengis.net/gml/srs/epsg.xml#7004</crs:UsedEllipsoid>
+      <crs:UsedPrimeMeridian>urn:opengis:def:crs:epsg::8901</crs:UsedPrimeMeridian>
+    </crs:GeodeticDatum>
+    <crs:GeodeticDatum>
       <crs:Id>epsg:6153</crs:Id>
       <crs:Name>Rassadiran</crs:Name>
       <crs:Version>2008-06-24</crs:Version>

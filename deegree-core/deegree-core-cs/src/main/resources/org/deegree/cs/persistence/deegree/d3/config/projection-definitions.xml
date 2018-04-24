@@ -10532,6 +10532,15 @@
 		<crs:FalseNorthing>75000.0</crs:FalseNorthing>
 	</crs:TransverseMercator>
 	<crs:TransverseMercator>
+		<crs:Id>epsg:19950</crs:Id>
+		<crs:Name>Swiss Oblique Mercator 1995</crs:Name>
+		<crs:LatitudeOfNaturalOrigin>46.952405555556</crs:LatitudeOfNaturalOrigin>
+		<crs:LongitudeOfNaturalOrigin>7.439583333333</crs:LongitudeOfNaturalOrigin>
+		<crs:ScaleFactor>1.0</crs:ScaleFactor>
+		<crs:FalseEasting>2600000.0</crs:FalseEasting>
+		<crs:FalseNorthing>1200000.0</crs:FalseNorthing>
+	</crs:TransverseMercator>
+	<crs:TransverseMercator>
 		<crs:Id>epsg:19954</crs:Id>
 		<crs:Name>Suriname Old TM</crs:Name>
 		<crs:LatitudeOfNaturalOrigin>0.0</crs:LatitudeOfNaturalOrigin>
