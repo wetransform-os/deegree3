@@ -1,4 +1,4 @@
-FROM java:7-jdk as builder
+FROM java:8-jdk as builder
 # Multi stage build - https://docs.docker.com/engine/userguide/eng-image/multistage-build/
 
 # install maven
@@ -13,7 +13,7 @@ RUN cd /build/ && \
   unzip -o /build/deegree-webservices.war -d /target
 
 # add to image...
-FROM tomcat:8.0-jre7
+FROM tomcat:8.5-jre8
 ENV LANG en_US.UTF-8
 
 # add build info - see hooks/build and http://label-schema.org/
