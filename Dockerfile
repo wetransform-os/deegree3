@@ -13,7 +13,7 @@ RUN cd /build/ && \
   unzip -o /build/deegree-webservices.war -d /target
 
 # add to image...
-FROM tomcat:8.0-jre8
+FROM tomcat:8.5-jre8
 ENV LANG en_US.UTF-8
 
 # add build info - see hooks/build and https://github.com/opencontainers/image-spec/blob/master/annotations.md
