@@ -20,7 +20,15 @@ RUN mkdir /root/.deegree \
     && rm -r /usr/local/tomcat/webapps/ROOT   
 
 COPY ./deegree-webservices.war /usr/local/tomcat/webapps/ROOT.war
- 
+
+# add build info - see https://github.com/opencontainers/image-spec/blob/master/annotations.md
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+LABEL org.opencontainers.image.created=$BUILD_DATE \
+  org.opencontainers.image.source=$VCS_URL \
+  org.opencontainers.image.revision=$VCS_REF
+
 #cmd:
 # 1. configure schemas directory mapping
 # 2. configure deegreeapi access
