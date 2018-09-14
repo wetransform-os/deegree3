@@ -16,14 +16,13 @@ RUN cd /build/ && \
 FROM tomcat:8.0-jre7
 ENV LANG en_US.UTF-8
 
-# add build info - see hooks/build and http://label-schema.org/
+# add build info - see hooks/build and https://github.com/opencontainers/image-spec/blob/master/annotations.md
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VCS_URL
-LABEL org.label-schema.build-date=$BUILD_DATE \
-  org.label-schema.vcs-url=$VCS_URL \
-  org.label-schema.vcs-ref=$VCS_REF \
-  org.label-schema.schema-version="1.0.0-rc1"
+LABEL org.opencontainers.image.created=$BUILD_DATE \
+  org.opencontainers.image.source=$VCS_URL \
+  org.opencontainers.image.revision=$VCS_REF
 
 EXPOSE 8080
 
