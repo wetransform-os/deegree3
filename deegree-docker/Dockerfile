@@ -17,6 +17,13 @@ RUN mkdir /root/.deegree \
     && rm -r /usr/local/tomcat/webapps/ROOT   
 
 COPY ./deegree-webservices.war /usr/local/tomcat/webapps/ROOT.war
+
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=30s \
+    --start-period=200s \
+    --retries=3 \
+    CMD curl --fail -u $apiUser:$apiPasswd http://localhost:8080/config/listworkspaces || exit 1
     
 #cmd:
 # 1. configure deegreeapi access
