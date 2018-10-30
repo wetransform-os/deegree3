@@ -13,6 +13,13 @@ ENV consoleSecretKey=000001544E797221:564344F65B8F9DDBA6A410E461E7801E10955F56D8
 ENV apiUser=deegree
 ENV apiPass=deegree
 
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=30s \
+    --start-period=200s \
+    --retries=3 \
+    CMD curl --fail -u $apiUser:$apiPasswd http://localhost:8080/config/listworkspaces || exit 1
+    
 # 1. create workspace dir
 # 2. create app schemas dir
 # 3. remove standard ROOT application
