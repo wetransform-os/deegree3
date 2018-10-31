@@ -16,7 +16,7 @@ ENV apiPass=deegree
 HEALTHCHECK \
     --interval=30s \
     --timeout=30s \
-    --start-period=200s \
+    --start-period=1200s \
     --retries=3 \
     CMD curl --fail -u $apiUser:$apiPasswd http://localhost:8080/config/listworkspaces || exit 1
     
