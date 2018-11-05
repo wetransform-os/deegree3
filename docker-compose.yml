@@ -1,0 +1,5 @@
+# simple compose file for running the Docker image
+deegree:
+  build: .
+  ports:
+    - "8080:8080"
