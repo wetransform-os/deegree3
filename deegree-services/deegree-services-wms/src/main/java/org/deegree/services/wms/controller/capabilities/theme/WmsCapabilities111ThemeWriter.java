@@ -415,7 +415,7 @@ public class WmsCapabilities111ThemeWriter {
                 writer.writeAttribute( "type", url.getType() );
             }
             if ( url.getFormat() == null ) {
-                writeElement( writer, "Format", "application/xml" );
+                writeElement( writer, "Format", "text/xml" );
             } else {
                 writeElement( writer, "Format", url.getFormat() );
             }
