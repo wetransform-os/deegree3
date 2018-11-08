@@ -239,7 +239,7 @@ public class StreamFeatureCollection implements FeatureInputStream {
         try {
             nextFeature = read();
         } catch ( IOException e ) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
         return new Iterator<Feature>() {
 
@@ -259,7 +259,7 @@ public class StreamFeatureCollection implements FeatureInputStream {
                 try {
                     next = read();
                 } catch ( IOException e ) {
-                    throw new RuntimeException();
+                    throw new RuntimeException(e);
                 }
                 return currentFeature;
             }
