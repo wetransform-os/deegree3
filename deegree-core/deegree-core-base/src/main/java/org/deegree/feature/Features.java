@@ -227,7 +227,7 @@ public class Features {
                         else
                             return;
                     } catch ( ReferenceResolvingException e ) {
-                        LOG.warn( "Unable to resolve external reference '" + ref.getURI() + ". Ignoring." );
+                        LOG.debug( "Unable to resolve external reference '" + ref.getURI() + ". Ignoring." );
                         return;
                     }
                 }
