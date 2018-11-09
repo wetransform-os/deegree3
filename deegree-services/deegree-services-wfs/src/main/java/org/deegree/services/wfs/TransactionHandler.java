@@ -175,6 +175,8 @@ class TransactionHandler {
 
     private final boolean allowFeatureReferencesToDatastore;
 
+    private final boolean disableXlinkResolvingOnInsert;
+
     /**
      * Creates a new {@link TransactionHandler} instance that uses the given service to lookup requested
      * {@link FeatureType}s.
@@ -188,12 +190,13 @@ class TransactionHandler {
      * @param allowFeatureReferencesToDatastore
      */
     TransactionHandler( WebFeatureService master, WfsFeatureStoreManager service, Transaction request,
-                        IDGenMode idGenMode, boolean allowFeatureReferencesToDatastore ) {
+                        IDGenMode idGenMode, boolean allowFeatureReferencesToDatastore, boolean disableXlinkResolvingOnInsert ) {
         this.master = master;
         this.service = service;
         this.request = request;
         this.idGenMode = idGenMode;
         this.allowFeatureReferencesToDatastore = allowFeatureReferencesToDatastore;
+        this.disableXlinkResolvingOnInsert = disableXlinkResolvingOnInsert;
     }
 
     /**
@@ -475,7 +478,9 @@ class TransactionHandler {
         }
 
         // resolve local xlink references
-        gmlStream.getIdContext().resolveLocalRefs();
+        if ( !disableXlinkResolvingOnInsert ) {
+            gmlStream.getIdContext().resolveLocalRefs();
+        }
 
         return fc;
     }
