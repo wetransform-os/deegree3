@@ -136,9 +136,7 @@ public class DeegreeWorkspaceUpdater {
         fileStatusMap.clear();
         final List<File> allFiles = new ArrayList<File>();
         collectFiles( wsDir, allFiles );
-        for ( File file : allFiles ) {
-            if ( "50ec_data_feature.xml".equals( file.getName() ) )
-                System.out.println( "check!" );
+        for ( File file : allFiles ) {       
             fileStatusMap.put( file, file.lastModified() );
         }
     }
