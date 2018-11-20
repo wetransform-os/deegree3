@@ -430,7 +430,7 @@ public class WmsCapabilities130ThemeWriter {
                 writer.writeAttribute( "type", url.getType() );
             }
             if ( url.getFormat() == null ) {
-                writeElement( writer, WMSNS, "Format", "application/xml" );
+                writeElement( writer, WMSNS, "Format", "text/xml" );
             } else {
                 writeElement( writer, WMSNS, "Format", url.getFormat() );
             }
