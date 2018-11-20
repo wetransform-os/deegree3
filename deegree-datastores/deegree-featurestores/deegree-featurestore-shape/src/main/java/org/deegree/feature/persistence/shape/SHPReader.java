@@ -529,7 +529,7 @@ public class SHPReader {
             int type = buffer.getInt();
             switch ( type ) {
             case NULL:
-                list.add( new Pair<float[], Long>( null, pos ) );
+                // do not add null envelope to index
                 break;
             case POINT: {
                 double x = buffer.getDouble();
