@@ -1,19 +1,19 @@
-FROM java:7-jdk as builder
+FROM java:8-jdk as builder
 # Multi stage build - https://docs.docker.com/engine/userguide/eng-image/multistage-build/
 
 # install maven
 RUN apt-get update && apt-get install -y --no-install-recommends maven
 
-# build and extract deegree
+# build and extract deegree (build twice due to dependency download issues)
 RUN mkdir /build && mkdir /target
 COPY ./ /build/
 RUN cd /build/ && \
-  mvn clean install -DskipTests && \
+  mvn clean install -DskipTests;mvn clean install -DskipTests && \
   cp /build/deegree-services/deegree-webservices/target/deegree-webservices-*.war /build/deegree-webservices.war && \
   unzip -o /build/deegree-webservices.war -d /target
 
 # add to image...
-FROM tomcat:8.0-jre7
+FROM tomcat:8.0-jre8
 ENV LANG en_US.UTF-8
 
 # add build info - see hooks/build and https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -28,7 +28,7 @@ EXPOSE 8080
 
 # set default secrets ( override for production use! )
 # consoleSecretKey="deegree"
-ENV consoleSecretKey=000001544E797221:564344F65B8F9DDBA6A410E461E7801E10955F56D8679284966F400C68B6CEAB 
+ENV consoleSecretKey=000001544E797221:564344F65B8F9DDBA6A410E461E7801E10955F56D8679284966F400C68B6CEAB
 ENV apiUser=deegree
 ENV apiPass=deegree
 
