@@ -41,11 +41,15 @@
  ----------------------------------------------------------------------------*/
 package org.deegree.rendering.r2d;
 
+import static java.lang.Math.round;
 import static org.deegree.commons.utils.math.MathUtils.isZero;
+import static org.deegree.geometry.utils.GeometryUtils.envelopeToPolygon;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D.Double;
+import java.awt.geom.Point2D;
 import java.util.Iterator;
 
 import org.deegree.cs.coordinatesystems.ICRS;
@@ -59,6 +63,7 @@ import org.deegree.geometry.linearization.NumPointsCriterion;
 import org.deegree.geometry.points.Points;
 import org.deegree.geometry.primitive.Curve;
 import org.deegree.geometry.primitive.Point;
+import org.deegree.geometry.primitive.Ring;
 import org.deegree.geometry.primitive.Surface;
 import org.slf4j.Logger;
 
@@ -71,6 +76,8 @@ import org.slf4j.Logger;
  * @version $Revision: $, $Date: $
  */
 class GeometryHelper {
+
+    private static final float PIXEL_GRID_SPACING = 0.25f;
 
     private static final Logger LOG = getLogger( GeometryHelper.class );
 
@@ -92,6 +99,26 @@ class GeometryHelper {
         }
     }
 
+    Rectangle getRenderedBounds( Geometry geom ) {
+        Envelope env = geom.getEnvelope();
+        if ( env == null ) {
+            return null;
+        }
+        try {
+            if ( transformer != null ) {
+                env = transformer.transform( env );
+            }
+            if ( env == null ) {
+                return null;
+            }
+            Ring ring = envelopeToPolygon( env ).getExteriorRing();
+            Double d = fromCurve( ring, true );
+            return d.getBounds();
+        } catch ( IllegalArgumentException | TransformationException | UnknownCRSException e ) {
+            throw new RuntimeException( e.getMessage(), e );
+        }
+    }
+
     Double fromCurve( Curve curve, boolean close ) {
         Double line = new Double();
 
@@ -102,24 +129,46 @@ class GeometryHelper {
         Points points = curve.getControlPoints();
         Iterator<Point> iter = points.iterator();
         Point p = iter.next();
-        double x = p.get0(), y = p.get1();
-        line.moveTo( x, y );
+        Point2D.Float startPoint = toScreen( p );
+        Point2D.Float lastPoint = startPoint;
+        line.moveTo( startPoint.getX(), startPoint.getY() );
         while ( iter.hasNext() ) {
             p = iter.next();
+            Point2D.Float point = toScreen( p );
             if ( iter.hasNext() ) {
-                line.lineTo( p.get0(), p.get1() );
+                if ( !equals( point, lastPoint ) ) {
+                    line.lineTo( point.getX(), point.getY() );
+                    lastPoint = point;
+                }
             } else {
-                if ( close && isZero( x - p.get0() ) && isZero( y - p.get1() ) ) {
+                if ( close && isZero( startPoint.getX() - point.getX() )
+                     && isZero( startPoint.getY() - point.getY() ) ) {
                     line.closePath();
                 } else {
-                    line.lineTo( p.get0(), p.get1() );
+                    line.lineTo( point.getX(), point.getY() );
                 }
             }
         }
-
-        line.transform( worldToScreen );
-
         return line;
+    }
+
+    private Point2D.Float toScreen( Point p ) {
+        Point2D.Double src = new Point2D.Double( p.get0(), p.get1() );
+        Point2D.Float dst = new Point2D.Float();
+        worldToScreen.transform( src, dst );
+        return snapToGrid( dst );
+    }
+
+    private boolean equals( Point2D.Float p1, Point2D.Float p2 ) {
+        return p1.x == p2.x && p1.y == p2.y;
+    }
+
+    private Point2D.Float snapToGrid( Point2D.Float p ) {
+        return new Point2D.Float( snapToGrid( p.x ), snapToGrid( p.y ) );
+    }
+
+    private float snapToGrid( float pixelOrdinate ) {
+        return ( (float) round( pixelOrdinate / PIXEL_GRID_SPACING ) ) * PIXEL_GRID_SPACING;
     }
 
     <T extends Geometry> T transform( T g ) {
