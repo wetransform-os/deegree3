@@ -40,6 +40,7 @@ import static java.util.Collections.emptyList;
 import static org.deegree.commons.ows.exception.OWSException.NOT_FOUND;
 import static org.deegree.commons.ows.exception.OWSException.NO_APPLICABLE_CODE;
 import static org.deegree.commons.tom.ows.Version.parseVersion;
+import static org.deegree.services.controller.DeegreeWorkspaceUpdater.INSTANCE;
 import static org.reflections.util.ClasspathHelper.forClassLoader;
 import static org.reflections.util.ClasspathHelper.forWebInfLib;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -1194,13 +1195,7 @@ public class OGCFrontController extends HttpServlet {
      */
     public void reload()
                             throws IOException, URISyntaxException, ServletException {
-        destroyWorkspace();
-        try {
-            initWorkspace();
-            DeegreeWorkspaceUpdater.INSTANCE.notifyWorkspaceChange( workspace );
-        } catch ( ResourceInitException e ) {
-            throw new ServletException( e.getLocalizedMessage(), e.getCause() );
-        }
+        update (true);
     }
 
     /**
@@ -1211,9 +1206,9 @@ public class OGCFrontController extends HttpServlet {
      * @throws URISyntaxException
      * @throws ServletException
      */
-    public void update()
+    public synchronized void update( boolean forceReload )
                             throws IOException, URISyntaxException, ServletException {
-        if ( DeegreeWorkspaceUpdater.INSTANCE.isWorkspaceChange(getActiveWorkspace()) ) {
+        if ( forceReload || INSTANCE.isWorkspaceChange(getActiveWorkspace()) ) {
             // do complete reload
             destroyWorkspace();
             try {
@@ -1221,10 +1216,10 @@ public class OGCFrontController extends HttpServlet {
             } catch ( ResourceInitException e ) {
                 throw new ServletException( e.getLocalizedMessage(), e.getCause() );
             }
-            DeegreeWorkspaceUpdater.INSTANCE.notifyWorkspaceChange( workspace );
+            INSTANCE.notifyWorkspaceChange( workspace );
         } else {
             // no complete reload - update only
-            DeegreeWorkspaceUpdater.INSTANCE.updateWorkspace( workspace );
+            INSTANCE.updateWorkspace( workspace );
         }
     }
 

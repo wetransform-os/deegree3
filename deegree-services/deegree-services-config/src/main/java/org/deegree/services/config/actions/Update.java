@@ -43,7 +43,7 @@ public class Update {
 
             OGCFrontController fc = OGCFrontController.getInstance();
             fc.setActiveWorkspaceName( p.first.getName() );
-            fc.update();
+            fc.update(false);
         } catch ( Exception e ) {
             IOUtils.write( "Error while updating: " + e.getLocalizedMessage() + "\n", resp.getOutputStream() );
             return;
