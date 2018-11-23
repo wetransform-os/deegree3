@@ -134,7 +134,7 @@ public class XMLSchemaInfoSet {
      */
     public XMLSchemaInfoSet( String... schemaUrls ) throws ClassCastException, ClassNotFoundException,
                             InstantiationException, IllegalAccessException {
-        xsModel = loadModel( schemaUrls );
+        xsModel = XSModelCache.getInstance().get( schemaUrls );
         init();
     }
 

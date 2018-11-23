@@ -106,6 +106,7 @@ import org.deegree.commons.utils.io.LoggingInputStream;
 import org.deegree.commons.utils.kvp.KVPUtils;
 import org.deegree.commons.xml.XMLAdapter;
 import org.deegree.commons.xml.XMLProcessingException;
+import org.deegree.commons.xml.schema.XSModelCache;
 import org.deegree.commons.xml.stax.XMLInputFactoryUtils;
 import org.deegree.commons.xml.stax.XMLStreamUtils;
 import org.deegree.feature.stream.ThreadedFeatureInputStream;
@@ -1182,6 +1183,7 @@ public class OGCFrontController extends HttpServlet {
         if ( requestWatchdog != null ) {
             requestWatchdog.destroy();
         }
+        XSModelCache.getInstance().clear();
         LOG.info( "" );
     }
 
