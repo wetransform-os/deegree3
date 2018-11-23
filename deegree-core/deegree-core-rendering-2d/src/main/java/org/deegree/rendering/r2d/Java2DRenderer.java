@@ -42,6 +42,7 @@ import static org.deegree.rendering.r2d.RenderHelper.calculateResolution;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D.Double;
 import java.util.Collection;
@@ -72,6 +73,10 @@ import org.slf4j.Logger;
  */
 @LoggingNotes(warn = "log info about problems with the renderer setup, or broken geometries coming in, or problematic usage of the renderer", debug = "log what's funny about rendering, eg. when null geometries are rendered, general info about the renderer, also log stack traces, use for debugging/improving your styles")
 public class Java2DRenderer implements Renderer {
+
+    // maximum width / height in pixels of polygon envelopes that are simplified to their
+    // envelope for rendering
+    private static final double COLLAPSE_TO_ENVELOPE_THRESHOLD = 1.0;
 
     private static final Logger LOG = getLogger( Java2DRenderer.class );
 
@@ -200,16 +205,24 @@ public class Java2DRenderer implements Renderer {
     }
 
     @Override
-    public void render( final PolygonStyling styling, final Geometry geom ) {
+    public void render( final PolygonStyling styling, Geometry geom ) {
         if ( geom == null ) {
             LOG.debug( "Trying to render null geometry." );
             return;
         }
         if ( geom instanceof Point ) {
             LOG.warn( "Trying to render point with polygon styling." );
+            return;
         } else if ( geom instanceof Curve ) {
             LOG.warn( "Trying to render line with polygon styling." );
+            return;
         }
+
+        Rectangle screenBounds = rendererContext.geomHelper.getRenderedBounds( geom.getEnvelope() );
+        if (screenBounds.getWidth() <= COLLAPSE_TO_ENVELOPE_THRESHOLD || screenBounds.getHeight() <= 1.0) {
+            geom = geom.getEnvelope();
+        }
+
         Geometry renderGeometry = null;
         if ( isGenerationExpensive( styling ) ) {
             renderGeometry = transformToWorldCrsAndClip( geom );
