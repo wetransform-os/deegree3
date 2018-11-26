@@ -225,19 +225,11 @@ public class GMLAppSchemaReaderTest {
     public void testParsingINSPIREAddresses()
                             throws ClassCastException, ClassNotFoundException, InstantiationException,
                             IllegalAccessException {
-
-        String schemaURL = TestProperties.getProperty( "schema_inspire_addresses" );
-        if ( schemaURL == null ) {
-            return;
-        }
-
+        String schemaURL = this.getClass().getResource( "../inspire/schema/Addresses.xsd" ).toString();
         GMLAppSchemaReader adapter = new GMLAppSchemaReader( GMLVersion.GML_32, null, schemaURL );
         AppSchema schema = adapter.extractAppSchema();
         FeatureType[] fts = schema.getFeatureTypes();
-        Assert.assertEquals( 75, fts.length );
-        for ( String ns : schema.getGMLSchema().getAppNamespaces() ) {
-            System.out.println( ns );
-        }
+        Assert.assertEquals( 92, fts.length );
     }
 
     @Test
