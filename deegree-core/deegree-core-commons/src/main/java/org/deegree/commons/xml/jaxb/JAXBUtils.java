@@ -40,7 +40,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -66,6 +68,8 @@ public class JAXBUtils {
     private static final Logger LOG = getLogger( JAXBUtils.class );
 
     private final static SchemaFactory sf = SchemaFactory.newInstance( "http://www.w3.org/2001/XMLSchema" );
+
+    private final static Map<String, JAXBContext> jaxbPackageToContext = new HashMap<>();
 
     public static Object unmarshall( String jaxbPackage, URL schemaLocation, InputStream input, Workspace workspace )
                             throws JAXBException {
@@ -107,18 +111,7 @@ public class JAXBUtils {
     private static Unmarshaller getUnmarshaller( String jaxbPackage, URL schemaLocation, Workspace workspace )
                             throws JAXBException {
 
-        JAXBContext jc = null;
-        try {
-            if ( workspace == null ) {
-                jc = JAXBContext.newInstance( jaxbPackage );
-            } else {
-                jc = JAXBContext.newInstance( jaxbPackage, workspace.getModuleClassLoader() );
-            }
-        } catch ( JAXBException e ) {
-            LOG.error( "Unable to instantiate JAXBContext for package '{}'", jaxbPackage );
-            throw e;
-        }
-        
+        JAXBContext jc = getJAXBContext( jaxbPackage, workspace );
         boolean performValidation=false; // TODO read value from configuration or support validation with local schema locations
         Unmarshaller u = jc.createUnmarshaller();
         if ( schemaLocation != null && performValidation ) {
@@ -131,6 +124,37 @@ public class JAXBUtils {
             }
         }
         return u;
+    }
+
+    /**
+     * Returns the {@link JAXBContext} for the given package.
+     * <p>
+     * https://stackoverflow.com/questions/18607318/how-can-i-improve-jaxb-performance
+     * </p>
+     *
+     * @param jaxbPackage
+     * @param workspace
+     * @return
+     * @throws JAXBException
+     */
+    private synchronized static JAXBContext getJAXBContext( String jaxbPackage, Workspace workspace )
+                            throws JAXBException {
+        JAXBContext jc = null;
+        try {
+            jc = jaxbPackageToContext.get( jaxbPackage );
+            if ( jc == null ) {
+                if ( workspace == null ) {
+                    jc = JAXBContext.newInstance( jaxbPackage );
+                } else {
+                    jc = JAXBContext.newInstance( jaxbPackage, workspace.getModuleClassLoader() );
+                }
+                jaxbPackageToContext.put( jaxbPackage, jc );
+            }
+        } catch ( JAXBException e ) {
+            LOG.error( "Unable to instantiate JAXBContext for package '{}'", jaxbPackage );
+            throw e;
+        }
+        return jc;
     }
 
     /**
