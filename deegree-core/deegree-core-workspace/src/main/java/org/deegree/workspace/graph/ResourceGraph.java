@@ -99,9 +99,6 @@ public class ResourceGraph {
     public synchronized <T extends Resource> ResourceNode<T> insertNode( ResourceMetadata<T> metadata ) {
         ResourceNode<T> node = new ResourceNode<T>( this, metadata );
         nodeMap.put( metadata.getIdentifier(), node );
-
-        updateDependencies();
-
         return node;
     }
 
@@ -110,7 +107,7 @@ public class ResourceGraph {
         updateDependencies();
     }
 
-    private void updateDependencies() {
+    public void updateDependencies() {
         // better algorithm possible?
         for ( ResourceNode<? extends Resource> node : nodeMap.values() ) {
             node.getDependencies().clear();

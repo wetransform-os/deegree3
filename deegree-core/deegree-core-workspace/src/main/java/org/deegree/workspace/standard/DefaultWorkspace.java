@@ -126,7 +126,6 @@ public class DefaultWorkspace implements Workspace {
     public void initAll() {
         startup();
         errors.clear();
-        scan();
         PreparedResources prepared = prepare();
 
         LOG.info( "--------------------------------------------------------------------------------" );
@@ -137,6 +136,7 @@ public class DefaultWorkspace implements Workspace {
         for ( ResourceMetadata<? extends Resource> md : prepared.getMetadata() ) {
             graph.insertNode( md );
         }
+        graph.updateDependencies();
 
         outer: for ( ResourceMetadata<? extends Resource> md : graph.toSortedList() ) {
             if ( states.getState( md.getIdentifier() ) == Deactivated ) {
@@ -361,6 +361,7 @@ public class DefaultWorkspace implements Workspace {
         ResourceMetadata<? extends Resource> md = resourceMetadata.get( id );
         mdList.add( md );
         graph.insertNode( md );
+        graph.updateDependencies();
         List<ResourceMetadata<? extends Resource>> dependencies = new ArrayList<ResourceMetadata<?>>();
         WorkspaceUtils.collectDependencies( dependencies, graph.getNode( id ) );
         mdList.addAll( dependencies );

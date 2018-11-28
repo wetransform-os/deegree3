@@ -119,6 +119,7 @@ public class AbstractResourceMetadataTest {
 
         graph.insertNode( md3 );
         ResourceNode node3 = graph.getNode( md3.getIdentifier() );
+        graph.updateDependencies();
 
         List deps = node1.getDependencies();
         Assert.assertEquals( 2, deps.size() );
