@@ -46,7 +46,7 @@ import java.net.URL;
 
 import javax.xml.namespace.QName;
 
-import org.deegree.commons.xml.schema.RedirectingEntityResolver;
+import org.deegree.commons.xml.schema.WellKnownSchemaManager;
 import org.deegree.protocol.wfs.describefeaturetype.DescribeFeatureType;
 import org.junit.Test;
 
@@ -93,7 +93,7 @@ public class DescribeFeatureTypeXMLAdapterTest {
 
     private URL get200ExampleUrl( String name ) {
         try {
-            String url = new RedirectingEntityResolver().redirect( WFS200_EXAMPLES_BASE_URL + name );
+            String url = WellKnownSchemaManager.redirect( WFS200_EXAMPLES_BASE_URL + name );
             return new URL( url );
         } catch ( MalformedURLException e ) {
             // should never happen

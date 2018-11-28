@@ -69,12 +69,12 @@ import org.w3c.dom.ls.LSInput;
  * <p>
  * <h4>Validation of instance documents</h4>
  * The XML schemas are either determined from the <code>xsi:schemaLocation</code> attribute of the document or may be
- * explicitly specified. The validator uses the {@link RedirectingEntityResolver}, so OGC core schemas are not fetched
+ * explicitly specified. The validator uses the {@link WellKnownSchemaManager}, so well-known schemas are not fetched
  * over the network, but loaded from a local copy.
  * </p>
  * <p>
  * <h4>Validation of schema documents</h4>
- * The validator uses the {@link RedirectingEntityResolver}, so OGC core schemas are not fetched over the network, but
+ * The validator uses the {@link WellKnownSchemaManager}, so well-known schemas are not fetched over the network, but
  * loaded from a local copy.
  * </p>
  * 
@@ -152,14 +152,13 @@ public class SchemaValidator {
         final List<SchemaValidationEvent> errors = new LinkedList<SchemaValidationEvent>();
 
         try {
-            RedirectingEntityResolver resolver = new RedirectingEntityResolver();
             if ( schemaUris != null ) {
                 for ( int i = 0; i < schemaUris.length; i++ ) {
-                    schemaUris[i] = resolver.redirect( schemaUris[i] );
+                    schemaUris[i] = WellKnownSchemaManager.redirect( schemaUris[i] );
                 }
             }
             GrammarPool grammarPool = ( schemaUris == null ? null : GrammarPoolManager.getGrammarPool( schemaUris ) );
-            XMLParserConfiguration parserConfig = createValidatingParser( new RedirectingEntityResolver(), grammarPool );
+            XMLParserConfiguration parserConfig = createValidatingParser( WellKnownSchemaManager.getInstance().getCatalogResolver(), grammarPool );
             parserConfig.setErrorHandler( new XMLErrorHandler() {
                 @SuppressWarnings("synthetic-access")
                 @Override
@@ -242,7 +241,7 @@ public class SchemaValidator {
         schemaLoader.setFeature( SCHEMA_FULL_CHECKING_FEATURE_ID, true );
         // NOTE: don't set to true, or validation of WFS GetFeature responses will fail (Xerces error?)!
         schemaLoader.setFeature( HONOUR_ALL_SCHEMA_LOCATIONS_ID, false );
-        schemaLoader.setEntityResolver( new RedirectingEntityResolver() );
+        schemaLoader.setEntityResolver( WellKnownSchemaManager.getInstance().getCatalogResolver() );
 
         schemaLoader.setErrorHandler( new XMLErrorHandler() {
             @SuppressWarnings("synthetic-access")
@@ -285,7 +284,7 @@ public class SchemaValidator {
                                                                   GrammarPool grammarPool )
                             throws XNIException {
 
-        XMLParserConfiguration parserConfiguration = null;
+        XMLParserConfiguration parserConfiguration = new XIncludeAwareParserConfiguration();
         if ( grammarPool == null ) {
             parserConfiguration = new XIncludeAwareParserConfiguration();
         } else {

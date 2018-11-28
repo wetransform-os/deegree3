@@ -36,6 +36,7 @@
 
 package org.deegree.commons.xml.stax;
 
+import static javax.xml.XMLConstants.DEFAULT_NS_PREFIX;
 import static javax.xml.stream.XMLStreamConstants.ATTRIBUTE;
 import static javax.xml.stream.XMLStreamConstants.CDATA;
 import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
@@ -52,6 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -66,10 +68,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.Location;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -77,6 +81,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.io.IOUtils;
 import org.apache.xerces.parsers.DOMParser;
 import org.deegree.commons.utils.ArrayUtils;
 import org.deegree.commons.utils.io.StreamBufferStore;
@@ -966,5 +971,39 @@ public class XMLStreamUtils {
             }
         }
     }
+    
+    public static Map<String, String> getNamespacePrefixes( String url )
+                            throws XMLStreamException, MalformedURLException, IOException {
+        InputStream is = null;
+        try {
+            is = new URL( url ).openStream();
+            XMLStreamReader xmlStream = XMLInputFactory.newInstance().createXMLStreamReader( is );
+            return getNamespacePrefixes( xmlStream );
+        } finally {
+            IOUtils.closeQuietly( is );
+        }
+    }
 
+    public static Map<String, String> getNamespacePrefixes( XMLStreamReader xmlStream )
+                            throws XMLStreamException {
+        Map<String, String> nsToPrefix = new HashMap<>();
+        while ( xmlStream.next() != END_DOCUMENT ) {
+            if ( xmlStream.isStartElement() ) {
+                for ( int i = 0; i < xmlStream.getNamespaceCount(); i++ ) {
+                    String prefix = xmlStream.getNamespacePrefix( i );
+                    if ( prefix != null && !prefix.equals( DEFAULT_NS_PREFIX ) ) {
+                        String nsUri = xmlStream.getNamespaceURI( i );
+                        String oldPrefix = nsToPrefix.get( nsUri );
+                        if ( oldPrefix != null && !oldPrefix.equals( prefix ) ) {
+                            LOG.debug( "Multiple prefices for namespace '" + nsUri + "': " + prefix + " / "
+                                       + oldPrefix );
+                        } else {
+                            nsToPrefix.put( nsUri, prefix );
+                        }
+                    }
+                }
+            }
+        }
+        return nsToPrefix;
+    }
 }

@@ -36,7 +36,7 @@
 package org.deegree.commons.xml.schema;
 
 import static java.util.Collections.emptyList;
-import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
+import static org.apache.xerces.impl.xs.XMLSchemaLoader.XMLGRAMMAR_POOL;
 import static org.apache.xerces.xs.XSConstants.DERIVATION_EXTENSION;
 import static org.apache.xerces.xs.XSConstants.DERIVATION_LIST;
 import static org.apache.xerces.xs.XSConstants.DERIVATION_RESTRICTION;
@@ -47,8 +47,6 @@ import static org.w3c.dom.DOMError.SEVERITY_FATAL_ERROR;
 import static org.w3c.dom.DOMError.SEVERITY_WARNING;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,13 +55,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
 
 import org.apache.xerces.impl.xs.XMLSchemaLoader;
 import org.apache.xerces.impl.xs.util.StringListImpl;
+import org.apache.xerces.util.XMLCatalogResolver;
+import org.apache.xerces.xni.grammars.XMLGrammarPool;
 import org.apache.xerces.xs.StringList;
 import org.apache.xerces.xs.XSComplexTypeDefinition;
 import org.apache.xerces.xs.XSConstants;
@@ -75,6 +72,7 @@ import org.apache.xerces.xs.XSNamespaceItemList;
 import org.apache.xerces.xs.XSTypeDefinition;
 import org.deegree.commons.xml.GenericLSInput;
 import org.deegree.commons.xml.XMLProcessingException;
+import org.deegree.commons.xml.stax.XMLStreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMConfiguration;
@@ -102,7 +100,7 @@ public class XMLSchemaInfoSet {
 
     /** The Xerces schema model. */
     protected final XSModel xsModel;
-
+    
     private Map<String, List<String>> nsToLocations;
 
     private Map<String, String> nsToPrefix;
@@ -216,41 +214,20 @@ public class XMLSchemaInfoSet {
     public synchronized Map<String, String> getNamespacePrefixes() {
         if ( nsToPrefix == null ) {
             nsToPrefix = new HashMap<String, String>();
+            WellKnownSchemaManager wellKnownSchemaManager = WellKnownSchemaManager.getInstance();
             for ( String ns : getSchemaNamespaces() ) {
                 for ( String componentLocation : getComponentLocations( ns ) ) {
-                    InputStream is = null;
                     try {
-                        LOG.debug( "Scanning schema component '" + componentLocation + "'" );
-                        is = new URL( componentLocation ).openStream();
-                        XMLStreamReader xmlStream = XMLInputFactory.newInstance().createXMLStreamReader( is );
-                        while ( xmlStream.next() != END_DOCUMENT ) {
-                            if ( xmlStream.isStartElement() ) {
-                                for ( int i = 0; i < xmlStream.getNamespaceCount(); i++ ) {
-                                    String prefix = xmlStream.getNamespacePrefix( i );
-                                    if ( prefix != null && !prefix.equals( XMLConstants.DEFAULT_NS_PREFIX ) ) {
-                                        String nsUri = xmlStream.getNamespaceURI( i );
-                                        String oldPrefix = nsToPrefix.get( nsUri );
-                                        if ( oldPrefix != null && !oldPrefix.equals( prefix ) ) {
-                                            LOG.debug( "Multiple prefices for namespace '" + nsUri + "': " + prefix
-                                                       + " / " + oldPrefix );
-                                        } else {
-                                            nsToPrefix.put( nsUri, prefix );
-                                        }
-                                    }
-                                }
-                            }
+                        LOG.debug( "Adding namespace prefixes from '" + componentLocation + "'" );
+                        componentLocation = WellKnownSchemaManager.redirect( componentLocation );
+                        Map<String, String> componentPrefixes = wellKnownSchemaManager.getNamespacePrefixes( componentLocation );
+                        if ( componentPrefixes == null ) {
+                            componentPrefixes = XMLStreamUtils.getNamespacePrefixes( componentLocation );
                         }
+                        nsToPrefix.putAll( componentPrefixes );
                     } catch ( Exception e ) {
                         LOG.error( "Error determining namespaces from schema component '" + componentLocation + "': "
                                    + e.getMessage() );
-                    } finally {
-                        if ( is != null ) {
-                            try {
-                                is.close();
-                            } catch ( IOException e ) {
-                                LOG.error( e.getMessage(), e );
-                            }
-                        }
                     }
                 }
             }
@@ -439,7 +416,7 @@ public class XMLSchemaInfoSet {
         }
         return getSubstitutions( elementDecl, namespace, transitive, onlyConcrete );
     }
-
+  
     /**
      * Creates a Xerces {@link XSModel} from the schemas at the given URLs, using the {@link RedirectingEntityResolver},
      * so OGC schemas URLs are redirected to a local copy.
@@ -455,7 +432,7 @@ public class XMLSchemaInfoSet {
     public static XSModel loadModel( String... schemaUrls )
                             throws ClassCastException, ClassNotFoundException, InstantiationException,
                             IllegalAccessException {
-
+        
         XMLSchemaLoader schemaLoader = new XMLSchemaLoader();
         DOMConfiguration config = schemaLoader.getConfig();
         ErrorHandler errorHandler = new ErrorHandler();
@@ -463,26 +440,23 @@ public class XMLSchemaInfoSet {
         config.setParameter( "error-handler", errorHandler );
         config.setParameter( "validate", Boolean.TRUE );
 
-        RedirectingEntityResolver resolver = new RedirectingEntityResolver();
+        XmlCatalogResolver resolver = WellKnownSchemaManager.getInstance().getCatalogResolver();
         for ( int i = 0; i < schemaUrls.length; i++ ) {
-            schemaUrls[i] = resolver.redirect( schemaUrls[i] );
+            try {                
+                String resolved = resolver.resolveSystem( schemaUrls[i] );
+                if (resolved != null) {
+                    schemaUrls[i] = resolved;
+                }                
+            } catch ( IOException e ) {
+                LOG.error( e.getMessage(), e );
+            }
         }
-        schemaLoader.setEntityResolver( resolver );
 
-        // // TODO what about preparsing of GML schemas?
-        // try {
-        // schemaLoader.setProperty( XMLGRAMMAR_POOL, GrammarPoolManager.getGrammarPool(
-        // "http://schemas.opengis.net/gml/3.1.1/base/gml.xsd" ) );
-        // } catch ( XMLConfigurationException e ) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // } catch ( XNIException e ) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // } catch ( IOException e ) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
+        schemaLoader.setEntityResolver( resolver );
+        XMLGrammarPool grammarPool = WellKnownSchemaManager.getInstance().getPreloadedGrammarPool();
+        if ( grammarPool != null ) {
+            schemaLoader.setProperty( XMLGRAMMAR_POOL, grammarPool );
+        }
 
         XSModel model = schemaLoader.loadURIList( new StringListImpl( schemaUrls, schemaUrls.length ) );
         if ( !errorHandler.getErrors().isEmpty() ) {
@@ -518,10 +492,9 @@ public class XMLSchemaInfoSet {
         config.setParameter( "validate", Boolean.TRUE );
 
         LSInput[] redirectedInputs = new LSInput[inputs.length];
-        RedirectingEntityResolver resolver = new RedirectingEntityResolver();
         for ( int i = 0; i < inputs.length; i++ ) {
             if ( inputs[i].getSystemId() != null ) {
-                String url = resolver.redirect( inputs[i].getSystemId() );
+                String url = WellKnownSchemaManager.redirect( inputs[i].getSystemId() );
                 if ( !( url.equals( inputs[i].getSystemId() ) ) ) {
                     LSInput redirectedInput = new GenericLSInput();
                     redirectedInput.setSystemId( url );
@@ -533,7 +506,7 @@ public class XMLSchemaInfoSet {
                 redirectedInputs[i] = inputs[i];
             }
         }
-        schemaLoader.setEntityResolver( resolver );
+        schemaLoader.setEntityResolver( WellKnownSchemaManager.getInstance().getCatalogResolver() );
 
         // // TODO what about preparsing of GML schemas?
         // try {
