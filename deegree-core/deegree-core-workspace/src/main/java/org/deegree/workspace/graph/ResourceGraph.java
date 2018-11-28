@@ -44,6 +44,7 @@ package org.deegree.workspace.graph;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -144,7 +145,7 @@ public class ResourceGraph {
         // sketch: first add resources without dependencies, then add resources whose dependencies are met until done
         HashSet<ResourceNode<? extends Resource>> nodes = new HashSet<ResourceNode<?>>( nodeMap.values() );
 
-        List<ResourceMetadata<? extends Resource>> roots = getRoots( nodes );
+        LinkedHashSet<ResourceMetadata<? extends Resource>> resourcesInInitOrder = getRoots( nodes );
 
         boolean changed = true;
 
@@ -156,16 +157,16 @@ public class ResourceGraph {
             }
             inner: for ( ResourceNode<? extends Resource> node : nodes ) {
                 for ( ResourceNode<? extends Resource> dep : node.getDependencies() ) {
-                    if ( !roots.contains( dep.getMetadata() ) ) {
+                    if ( !resourcesInInitOrder.contains( dep.getMetadata() ) ) {
                         continue inner;
                     }
                 }
                 for ( ResourceNode<? extends Resource> dep : node.getSoftDependencies() ) {
-                    if ( !roots.contains( dep.getMetadata() ) ) {
+                    if ( !resourcesInInitOrder.contains( dep.getMetadata() ) ) {
                         continue inner;
                     }
                 }
-                roots.add( node.getMetadata() );
+                resourcesInInitOrder.add( node.getMetadata() );
                 nodes.remove( node );
                 changed = true;
                 // could be optimized by continuing to inner, needs a little rewrite
@@ -173,11 +174,11 @@ public class ResourceGraph {
             }
         }
 
-        return roots;
+        return new ArrayList<>(resourcesInInitOrder);
     }
 
-    private List<ResourceMetadata<? extends Resource>> getRoots( HashSet<ResourceNode<? extends Resource>> nodes ) {
-        List<ResourceMetadata<? extends Resource>> roots = new ArrayList<ResourceMetadata<? extends Resource>>();
+    private LinkedHashSet<ResourceMetadata<? extends Resource>> getRoots( HashSet<ResourceNode<? extends Resource>> nodes ) {
+        LinkedHashSet<ResourceMetadata<? extends Resource>> roots = new LinkedHashSet<ResourceMetadata<? extends Resource>>();
         for ( ResourceNode<? extends Resource> node : nodeMap.values() ) {
             if ( node.getDependencies().isEmpty() && node.getSoftDependencies().isEmpty() ) {
                 roots.add( node.getMetadata() );
