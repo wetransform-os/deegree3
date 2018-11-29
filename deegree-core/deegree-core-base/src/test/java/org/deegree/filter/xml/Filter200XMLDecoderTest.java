@@ -51,7 +51,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.deegree.commons.tom.primitive.PrimitiveValue;
 import org.deegree.commons.xml.XMLParsingException;
-import org.deegree.commons.xml.schema.RedirectingEntityResolver;
+import org.deegree.commons.xml.schema.WellKnownSchemaManager;
 import org.deegree.commons.xml.stax.XMLStreamUtils;
 import org.deegree.filter.Filter;
 import org.deegree.filter.IdFilter;
@@ -395,7 +395,7 @@ public class Filter200XMLDecoderTest {
 
     private URL buildUrl( String name, String version ) {
         try {
-            String url = new RedirectingEntityResolver().redirect( OGC_EXAMPLES_BASE_URL + version + "/" + name );
+            String url = WellKnownSchemaManager.redirect( OGC_EXAMPLES_BASE_URL + version + "/" + name );
             return new URL( url );
         } catch ( MalformedURLException e ) {
             // should never happen

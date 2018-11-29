@@ -133,7 +133,7 @@ class GrammarPoolManager {
             LOG.debug( "Creating grammar pool for schemas: {" + s + "}." );
         }
 
-        XMLEntityResolver resolver = new RedirectingEntityResolver();
+        XMLEntityResolver resolver = WellKnownSchemaManager.getInstance().getCatalogResolver();
         SymbolTable sym = new SymbolTable( BIG_PRIME );
 
         XMLGrammarPreparser preparser = new XMLGrammarPreparser( sym );
