@@ -11,7 +11,10 @@ import org.apache.xerces.xni.parser.XMLInputSource;
 /**
  * Wraps an {@link XMLCatalogResolver} to add support for the custom "ocgschemas:" protocol.
  * <p>
- * Redirects "ogcschemas:" to "/META-INF/SCHEMAS_OPENGIS_NET" on the classpath, enabling access to the ogcschemas JAR.
+ * In order to supersede the functionality of the old <code>RedirectingEntityResolver</code>, this resolver adds another
+ * layer of redirection. In addition to the resolving of the underlying catalog resolver, it replaces the String
+ * "ogcschemas:" (in resolved URLs) with the URL of "/META-INF/SCHEMAS_OPENGIS_NET" on the classpath, enabling access to
+ * the files in the ogcschemas JAR.
  * </p>
  */
 public class XmlCatalogResolver implements XMLEntityResolver {
@@ -24,7 +27,12 @@ public class XmlCatalogResolver implements XMLEntityResolver {
 
     XmlCatalogResolver( XMLCatalogResolver resolver ) {
         this.resolver = resolver;
-        this.ogcSchemasBaseUrl = XMLCatalogResolver.class.getResource( "/META-INF/SCHEMAS_OPENGIS_NET" ).toString();
+        String ogcSchemasBaseUrl = XMLCatalogResolver.class.getResource( "/META-INF/SCHEMAS_OPENGIS_NET" ).toString();
+        if ( ogcSchemasBaseUrl.endsWith( "/" ) ) {
+            // depending on the classloader, a trailing "/" may be present or not
+            ogcSchemasBaseUrl = ogcSchemasBaseUrl.substring( 0, ogcSchemasBaseUrl.length() - 1 );
+        }
+        this.ogcSchemasBaseUrl = ogcSchemasBaseUrl;
     }
 
     @Override
