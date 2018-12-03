@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.deegree</groupId>
     <artifactId>deegree-core-sqldialect</artifactId>
-    <version>3.4-RC7</version>
+    <version>3.4.3</version>
   </parent>
 
   <repositories>
@@ -41,7 +41,7 @@
       <dependencies>
         <dependency>
           <groupId>com.oracle</groupId>
-          <artifactId>ojdbc6</artifactId>
+          <artifactId>ojdbc8</artifactId>
         </dependency>
       </dependencies>
     </profile>

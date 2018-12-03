@@ -114,6 +114,9 @@ import org.deegree.services.controller.ImplementationMetadata;
 import org.deegree.services.controller.OGCFrontController;
 import org.deegree.services.controller.exception.serializer.XMLExceptionSerializer;
 import org.deegree.services.controller.utils.HttpResponseBuffer;
+import org.deegree.services.encoding.LimitedSupportedEncodings;
+import org.deegree.services.encoding.SupportedEncodings;
+import org.deegree.services.encoding.UnlimitedSupportedEncodings;
 import org.deegree.services.i18n.Messages;
 import org.deegree.services.jaxb.controller.DeegreeServiceControllerType;
 import org.deegree.services.jaxb.metadata.DeegreeServicesMetadataType;
@@ -136,9 +139,6 @@ import org.deegree.services.metadata.provider.OWSMetadataProviderProvider;
 import org.deegree.services.ows.OWS100ExceptionReportSerializer;
 import org.deegree.services.ows.OWS110ExceptionReportSerializer;
 import org.deegree.services.ows.PreOWSExceptionReportSerializer;
-import org.deegree.services.wfs.encoding.LimitedSupportedEncodings;
-import org.deegree.services.wfs.encoding.SupportedEncodings;
-import org.deegree.services.wfs.encoding.UnlimitedSupportedEncodings;
 import org.deegree.services.wfs.format.Format;
 import org.deegree.services.wfs.query.StoredQueryHandler;
 import org.deegree.workspace.ResourceIdentifier;
@@ -202,6 +202,7 @@ import static org.deegree.protocol.wfs.WFSRequestType.ListStoredQueries;
 import static org.deegree.protocol.wfs.WFSRequestType.LockFeature;
 import static org.deegree.protocol.wfs.WFSRequestType.Transaction;
 import static org.deegree.protocol.wfs.getfeature.ResultType.HITS;
+import static org.deegree.services.jaxb.wfs.IdentifierGenerationOptionType.USE_EXISTING_RESOLVING_REFERENCES_INTERNALLY;
 
 /**
  * Implementation of the <a href="http://www.opengeospatial.org/standards/wfs">OpenGIS Web Feature Service</a> server
@@ -281,8 +282,9 @@ public class WebFeatureService extends AbstractOWS {
         EnableTransactions enableTransactions = jaxbConfig.getEnableTransactions();
         if ( enableTransactions != null ) {
             this.enableTransactions = enableTransactions.isValue();
-            this.idGenMode = parseIdGenMode( enableTransactions.getIdGen() );
-            this.allowFeatureReferencesToDatastore = enableTransactions.isAllowFeatureReferencesToDatastore();
+            IdentifierGenerationOptionType configuredIdGenMode = enableTransactions.getIdGen();
+            this.idGenMode = parseIdGenMode( configuredIdGenMode );
+            this.allowFeatureReferencesToDatastore = USE_EXISTING_RESOLVING_REFERENCES_INTERNALLY.equals( configuredIdGenMode );
         }
         if ( jaxbConfig.isEnableResponseBuffering() != null ) {
             disableBuffering = !jaxbConfig.isEnableResponseBuffering();
@@ -358,7 +360,7 @@ public class WebFeatureService extends AbstractOWS {
     }
 
     private LimitedSupportedEncodings parseEncodingWithSupportedEncodings( List<String> supportedEncodingsForAllRequestTypes ) {
-        LimitedSupportedEncodings limitedSupportedEncodings = new LimitedSupportedEncodings();
+        LimitedSupportedEncodings<WFSRequestType> limitedSupportedEncodings = new LimitedSupportedEncodings();
         limitedSupportedEncodings.addEnabledEncodings( CreateStoredQuery,
                                                        collectEnabledEncodings( supportedEncodingsForAllRequestTypes ) );
         limitedSupportedEncodings.addEnabledEncodings( DescribeFeatureType,
@@ -388,7 +390,7 @@ public class WebFeatureService extends AbstractOWS {
 
     private LimitedSupportedEncodings parseEncodingsWithSpecifiedRequestTypes( SupportedRequests supportedRequests,
                                                                                List<String> supportedEncodingsForAllRequestTypes ) {
-        LimitedSupportedEncodings limitedSupportedEncodings = new LimitedSupportedEncodings();
+        LimitedSupportedEncodings<WFSRequestType> limitedSupportedEncodings = new LimitedSupportedEncodings();
         limitedSupportedEncodings.addEnabledEncodings( CreateStoredQuery,
                                                        collectEnabledEncodings( supportedRequests.getCreateStoredQuery(),
                                                                                 supportedEncodingsForAllRequestTypes ) );
@@ -474,6 +476,7 @@ public class WebFeatureService extends AbstractOWS {
         case GENERATE_NEW: {
             return IDGenMode.GENERATE_NEW;
         }
+        case USE_EXISTING_RESOLVING_REFERENCES_INTERNALLY:
         case USE_EXISTING: {
             return IDGenMode.USE_EXISTING;
         }

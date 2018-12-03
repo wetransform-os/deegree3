@@ -117,9 +117,10 @@ General options
 Transactions
 ^^^^^^^^^^^^
 
-By default, WFS-T requests will be rejected. Setting the ``EnableTransactions`` option to ``true`` will enable transaction support. This option has two optional attributes: ``allowFeatureReferencesToDatastore`` and ``idGenMode``. If ``allowFeatureReferencesToDatastore`` is true it is allowed to insert features with references to already inserted features, default is false. ``idGenMode`` controls how ids of inserted features (the values in the gml:id attribute) are treated. There are three id generation modes available:
+By default, WFS-T requests will be rejected. Setting the ``EnableTransactions`` option to ``true`` will enable transaction support. This option has the optional attribute ``idGenMode`` which controls how ids of inserted features (the values in the gml:id attribute) are treated. There are three id generation modes available:
 
 * **UseExisting**: The original gml:id values from the input are stored. This may lead to errors if the provided ids are already in use.
+* **UseExistingResolvingReferencesInternally**: Same as UseExisting, but it is allowed to insert features with references to already inserted features.
 * **GenerateNew** (default): New and unique ids are generated. References in the input GML (xlink:href) that point to a feature with an reassigned id are fixed as well, so reference consistency is maintained.
 * **ReplaceDuplicate**: The WFS will try to use the original gml:id values that have been provided in the input. In case a certain identifier already exists in the backend, a new and unique identifier will be generated. References in the input GML (xlink:href) that point to a feature with an reassigned id are fixed as well, so reference consistency is maintained.
 
@@ -147,9 +148,9 @@ This option can be used to configure the supported request types. Currently the 
 +-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
 | Option                | Cardinality  | Value   | Description                                                                                                                                  |
 +=======================+==============+=========+==============================================================================================================================================+
-| SupportedEncodings    | 0..1         | String  | Enable encodings for all configured request types. Allowed values: 'kvp', 'xml', 'soap'. Multiple values must be seperated by a white space. |
+| SupportedEncodings    | 0..1         | String  | Enable encodings for all configured request types. Allowed values: 'kvp', 'xml', 'soap'. Multiple values must be separated by a white space. |
 +-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
-| GetCapabilities       | 0..1         | Complex | Configuration of GetCapabilties requests                                                                                                     |
+| GetCapabilities       | 0..1         | Complex | Configuration of GetCapabilities requests                                                                                                    |
 +-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
 | DescribeFeatureType   | 0..1         | Complex | Configuration of DescribeFeatureType requests                                                                                                |
 +-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
@@ -179,18 +180,25 @@ Each request type has the following sup-option:
 +---------------------+--------------+---------+------------------------------------------------------------------------------------------------------------------------------------+
 | Option              | Cardinality  | Value   | Description                                                                                                                        |
 +=====================+==============+=========+====================================================================================================================================+
-| SupportedEncodings  | 0..1         | String  | Enable encodings for this request types. Allowed values: 'kvp', 'xml', 'soap'. Multiple values must be seperated by a white space. |
+| SupportedEncodings  | 0..1         | String  | Enable encodings for this request types. Allowed values: 'kvp', 'xml', 'soap'. Multiple values must be separated by a white space. |
 +---------------------+--------------+---------+------------------------------------------------------------------------------------------------------------------------------------+
 
+By default deegree will provide all supported request types with all available encodings (kvp, xml, soap).
 
-By default deegree will provide all supported requests type with all available encodings (kvp, xml, soap). To limit the provided request types to GetCapabilties and GetFeature this request types can be added without SupportedEncodings sub-option:
+If a single supported request or encoding is configured, all non configured requests or encodings are disabled.
+
+Example: To limit the provided request types to GetCapabilities and GetFeature this request types can be added without SupportedEncodings sub-option:
 
    .. literalinclude:: xml/supportedRequests.xml
       :language: xml
 
-.. hint::
+Example: To disable SOAP encoding the other encodings can be added without SupportedRequests sub-option:
+
+   .. literalinclude:: xml/deactivateSoap.xml
+      :language: xml
+
+.. warning::
    It is not checked if the configuration is valid against the WFS specification!
-  
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Adapting GML output formats
@@ -260,6 +268,8 @@ Option ``GetFeatureResponse`` has the following sub-options:
 * ``DisableDynamicSchema``: By default, the GML application schema returned in DescribeFeatureType reponses (and referenced in the ``xsi:schemaLocation`` of query responses) will be generated dynamically from the internal feature type representation. This allows generation of application schemas for different GML versions and is fine for simple feature models (e.g. feature types served from shapefiles or flat database tables). However, valid re-encoding of complex GML application schema (such as INSPIRE Data Themes) is technically not feasible. In these cases, you will have to set this option to ``false``, so the WFS will produce a response that refers to the original schema files used for configuring the feature store. If you want the references to point to an external copy of your GML application schema files (instead of pointing back to the deegree WFS), use the optional attribute ``baseURL`` that this element provides.
 * ``DisableStreaming``: By default, returned features are not collected in memory, but directly streamed from the backend (e.g. an SQL database) and individually encoded as GML. This enables the querying of huge numbers of features with only minimal memory footprint. However, by using this strategy, the number of features and their bounding box is not known when the WFS starts to write out the response. Therefore, this information is omitted from the response (which is perfectly valid according to WFS 1.0.0 and 1.1.0, and a change request for WFS 2.0.0 has been accepted). If you find that your WFS client has problems with the response, you may set this option to ``false``. Features will be collected in memory first and the generated response will include numberOfFeature information and gml:boundedBy for the collection. However, for huge response and heavy server load, this is not recommended as it introduces significant overhead and may result in out-of-memory errors.
 * ``PrebindNamespace``: By default, XML namespaces are bound when they are needed. This will result in valid output, but may lead to the same namespace being bound again and again in different parts of the response document. Using this option, namespaces can be bound in the root element, so they are defined for the full scope of the response document and do not need re-definition at several positions in the document. This option has the required attributes ``prefix`` and ``uri``.
+.. note::
+  PrebindNamespaces must be configured as in used GML application schemas respectively the imported features (at least for the BLOB mode). It is essential to ensure that prefixes are bound to the same namespace URIs. Otherwise, a GetFeature request may result in a failure ("Duplicate declaration for namespace prefix").
 
 """""""""""""""""""""
 Coordinate formatters
@@ -306,7 +316,7 @@ Here's an example of a linearized version of the example geometry as it would be
 Adding custom output formats
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Using option element ``CustomFormat``, it possible to plug-in your own Java classes to generate the output for a specific mime type (e.g. a binary format)
+Using option element ``CustomFormat``, it is possible to plug-in your own Java classes to generate the output for a specific mime type (e.g. a binary format)
 
 +-----------+-------------+---------+------------------------------------------------------+
 | Option    | Cardinality | Value   | Description                                          |
@@ -406,6 +416,8 @@ The following table shows what top level options are available.
 +==========================+==============+=========+==============================================================================+
 | SupportedVersions        | 0..1         | Complex | Limits active OGC protocol versions                                          |
 +--------------------------+--------------+---------+------------------------------------------------------------------------------+
+| SupportedRequests        | 0..1         | Complex | Configuration of WMS requests                                                |
++--------------------------+--------------+---------+------------------------------------------------------------------------------+
 | UpdateSequence           | 0..1         | Integer | Current update sequence, default: 0                                          |
 +--------------------------+--------------+---------+------------------------------------------------------------------------------+
 | MetadataStoreId          | 0..1         | String  | Configures a metadata store to check if metadata ids for layers exist        |
@@ -449,6 +461,62 @@ Here is a snippet for quick copy & paste:
   </SupportedVersions>
   <MetadataStoreId>mdstore</MetadataStoreId>
   <MetadataURLTemplate>http://discovery.eu/csw?service=CSW&amp;request=GetRecordById&amp;version=2.0.2&amp;id=${metadataSetId}&amp;outputSchema=http://www.isotc211.org/2005/gmd&amp;elementSetName=full</MetadataURLTemplate>
+
+.. _anchor-wms-supportedrequests:
+
+^^^^^^^^^^^^^^^^^^
+SupportedRequests
+^^^^^^^^^^^^^^^^^^
+
+This option can be used to configure the supported request types. Currently, the supported encodings can be specified for each request type. If the option is missing, all encodings are supported for each request type. The option has the following sup-options:
+
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| Option                | Cardinality  | Value   | Description                                                                                                                                  |
++=======================+==============+=========+==============================================================================================================================================+
+| SupportedEncodings    | 0..1         | String  | Enable encodings for all configured request types. Allowed values: 'kvp', 'xml', 'soap'. Multiple values must be separated by a white space. |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| GetCapabilities       | 0..1         | Complex | Configuration of GetCapabilities requests                                                                                                    |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| GetMap                | 0..1         | Complex | Configuration of GetMap requests                                                                                                             |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| GetFeatureInfo        | 0..1         | Complex | Configuration of GetFeatureInfo requests                                                                                                     |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| DescribeLayer         | 0..1         | Complex | Configuration of DescribeLayer requests                                                                                                      |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| GetLegendGraphic      | 0..1         | Complex | Configuration of GetLegendGraphic requests                                                                                                   |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| GetFeatureInfoSchema  | 0..1         | Complex | Configuration of GetFeatureInfoSchema requests                                                                                               |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+| DTD                   | 0..1         | Complex | Configuration of DTD requests                                                                                                                |
++-----------------------+--------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------+
+
+Each request type has the following sup-option:
+
++---------------------+--------------+---------+------------------------------------------------------------------------------------------------------------------------------------+
+| Option              | Cardinality  | Value   | Description                                                                                                                        |
++=====================+==============+=========+====================================================================================================================================+
+| SupportedEncodings  | 0..1         | String  | Enable encodings for this request types. Allowed values: 'kvp', 'xml', 'soap'. Multiple values must be separated by a white space. |
++---------------------+--------------+---------+------------------------------------------------------------------------------------------------------------------------------------+
+
+By default deegree will provide all supported request types with all available encodings (kvp, xml, soap).
+
+If a single supported request or encoding is configured, all non configured requests or encodings are disabled.
+
+Example: To limit the provided request types to GetCapabilities and GetFeature this request types can be added without SupportedEncodings sub-option:
+
+   .. literalinclude:: xml/supportedRequests.xml
+      :language: xml
+
+Example: To disable SOAP encoding the other encodings can be added without SupportedRequests sub-option:
+
+   .. literalinclude:: xml/deactivateSoap.xml
+      :language: xml
+
+.. warning::
+   It is not checked if the configuration is valid against the WMS specification!
+
+.. warning::
+   WMS 1.1.1 just supports KVP. SOAP can only be used for GetCapabilities, GetMap and GetFeatureInfo operations of WMS 1.3.0. Nevertheless, configuration of all combinations is possible.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Service content configuration
@@ -527,6 +595,7 @@ This is how the configuration section looks like for configuring a deegree templ
     <GetFeatureInfoFormat>
       <File>../customformat.gfi</File>
       <Format>text/html</Format>
+      <Property name="customname" value="customvalue" \>
     </GetFeatureInfoFormat>
   </FeatureInfoFormats>
 
@@ -538,6 +607,7 @@ The configuration for the XSLT approach looks like this:
     <GetFeatureInfoFormat>
       <XSLTFile gmlVersion="GML_32">../customformat.xsl</XSLTFile>
       <Format>text/html</Format>
+      <Property name="customname" value="customvalue" \>
     </GetFeatureInfoFormat>
   </FeatureInfoFormats>
 
@@ -726,6 +796,36 @@ This is how the configuration section looks like for configuring only ``image/pn
     <GetMapFormat>image/png</GetMapFormat>
   </GetMapFormats>
 
+"""""""""""""""""""""""""""""
+Custom format provider class
+"""""""""""""""""""""""""""""
+Using option element ``CustomGetMapFormat``, it is possible to plug-in your own Java classes to generate the output for a specific mime type
+
++-----------+-------------+---------+------------------------------------------------------+
+| Option    | Cardinality | Value   | Description                                          |
++===========+=============+=========+======================================================+
+| Format    | 1..1        | String  | Mime type associated with this format configuration  |
++-----------+-------------+---------+------------------------------------------------------+
+| JavaClass | 1..1        | String  | Qualified Java class name                            |
++-----------+-------------+---------+------------------------------------------------------+
+| Property  | 0..n        | Complex | Configure properties of the JavaClass                |
++-----------+-------------+---------+------------------------------------------------------+
+
+* ``Format``: Mime type associated with this format configuration (and announced in GetCapabilities)
+* ``JavaClass``: Therefore, an implementation of interface ``org.deegree.rendering.r2d.ImageSerializer`` must be present on the classpath.
+* ``Property``:
+
+This is how the configuration looks like for the implementation of GeoTIFF:
+
+.. code-block:: xml
+
+  <GetMapFormats>
+    <CustomGetMapFormat>
+      <Format>image/tiff</Format>
+      <JavaClass>org.deegree.services.wms.controller.plugins.ImageSerializerGeoTiff</JavaClass>
+    </CustomGetMapFormat>
+  </GetMapFormats>
+
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Custom exception formats
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -838,6 +938,9 @@ The operations GetCapabilities, GetMap and GetFeatureInfo support SOAP request e
 
    .. literalinclude:: xml/wms_getcapabilities_soap_request_body.xml
       :language: xml
+
+.. hint::
+   SOAP encoding can be deactivated. Chapter :ref:`anchor-wms-supportedrequests` describes and gives an example how to disable it.
 
 """"""""""""
 Capabilities
