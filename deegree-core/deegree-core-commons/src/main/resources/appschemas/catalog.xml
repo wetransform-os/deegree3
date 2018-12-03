@@ -4,6 +4,7 @@
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog"
 	prefer="public">
 	<rewriteSystem systemIdStartString="http://portele.de/" rewritePrefix="./portele.de/"/>
+	<!--  ogcschemas: pseudo protocol that is replaced with a URL that points into the deegree-ogcschemas JAR -->
 	<rewriteSystem systemIdStartString="http://schemas.opengis.net/" rewritePrefix="ogcschemas:/"/>
 	<rewriteSystem systemIdStartString="http://www.w3.org/" rewritePrefix="./www.w3.org/"/>
 </catalog>
