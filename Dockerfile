@@ -38,9 +38,13 @@ RUN mkdir /root/.deegree && \
 COPY --from=builder /target /usr/local/tomcat/webapps/ROOT
 
 #cmd:
-# 1. configure deegreeapi access
-# 2. configure console access
-# 3. start tomcat
-CMD  sed -i '44i <user username="'"$apiUser"'" password="'"$apiPasswd"'" roles="deegree" \/> /' /usr/local/tomcat/conf/tomcat-users.xml \
+# 1. configure schemas directory mapping
+# 2. configure deegreeapi access
+# 3. configure console access
+# 4. start tomcat
+
+CMD sed -i 's/.*<\/Host>/<Context docBase="\/root\/.deegree\/ws_production\/appschemas" path="\/schemas"\/>  <\/Host>/' /usr/local/tomcat/conf/server.xml \
+     && sed -i '44i <user username="'"$apiUser"'" password="'"$apiPasswd"'" roles="deegree" \/> /' /usr/local/tomcat/conf/tomcat-users.xml \
      && echo $consoleSecretKey >/root/.deegree/console.pw \
+     && mkdir -p /root/.deegree/ws_production/appschemas \
      && /usr/local/tomcat/bin/catalina.sh run
