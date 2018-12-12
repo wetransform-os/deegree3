@@ -178,7 +178,7 @@ public class Java2DRenderer implements Renderer {
             return;
         }
         if ( geom instanceof Point ) {
-            LOG.warn( "Trying to render point with line styling." );
+            LOG.debug( "Trying to render point with line styling." );
             return;
         }
         Geometry renderGeometry = null;
@@ -211,10 +211,10 @@ public class Java2DRenderer implements Renderer {
             return;
         }
         if ( geom instanceof Point ) {
-            LOG.warn( "Trying to render point with polygon styling." );
+            LOG.debug( "Trying to render point with polygon styling." );
             return;
         } else if ( geom instanceof Curve ) {
-            LOG.warn( "Trying to render line with polygon styling." );
+            LOG.debug( "Trying to render line with polygon styling." );
             return;
         }
 
@@ -282,7 +282,7 @@ public class Java2DRenderer implements Renderer {
     Geometry transformToWorldCrsAndClip( final Geometry geom ) {
         final Geometry geomInWorldCrs = rendererContext.geomHelper.transform( geom );
         if ( rendererContext.clipper == null ) {
-            LOG.warn( "No clipper defined, geometry will be ignored for rendering" );
+            LOG.debug( "No clipper defined, geometry will be ignored for rendering" );
             return null;
         }
         return rendererContext.clipper.clipGeometry( geomInWorldCrs );
