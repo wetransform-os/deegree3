@@ -47,6 +47,7 @@ import org.deegree.filter.FilterEvaluationException;
 import org.deegree.filter.MatchAction;
 import org.deegree.filter.Operator;
 import org.deegree.filter.i18n.Messages;
+import org.deegree.gml.reference.FeatureReference;
 
 /**
  * Abstract base class for all comparison operators.
@@ -137,6 +138,14 @@ public abstract class ComparisonOperator implements Operator {
                 return new PrimitiveValue( "null" );
             }
             return getPrimitiveValue( children.get( 0 ) );
+        }
+        if ( node instanceof FeatureReference ) {
+            FeatureReference fReference= (FeatureReference) node;
+            String uri = fReference.getURI();
+            if(uri!=null)
+                return new PrimitiveValue( uri );
+            else
+                return new PrimitiveValue( node.toString() );
         }
         return new PrimitiveValue( node.toString() );
     }
