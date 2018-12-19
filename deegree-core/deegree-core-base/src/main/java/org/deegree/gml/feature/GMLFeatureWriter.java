@@ -466,7 +466,7 @@ public class GMLFeatureWriter extends AbstractGMLObjectWriter {
 
     private void writeNilAttributes( Map<QName, PrimitiveValue> attributes )
                             throws XMLStreamException {
-        writeAttribute( writer, XSI_NIL, "true" );
+        writeAttributeWithNS( XSI_NIL.getNamespaceURI(), XSI_NIL.getLocalPart(), "true" );
         PrimitiveValue value = attributes.get( NIL_REASON );
         if ( value != null )
             writeAttribute( writer, NIL_REASON, value.getAsText() );
