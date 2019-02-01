@@ -175,12 +175,12 @@ public class GmlDocumentIdContext implements GMLReferenceResolver {
         if ( uri.startsWith( "#" ) ) {
             return idToObject.get( uri.substring( 1 ) );
         } else if ( uri.startsWith( "urn:" ) ) {
-            LOG.warn( "Unable to resolve external object reference: " + uri
+            LOG.debug( "Unable to resolve external object reference: " + uri
                       + ". Resolving of urn references is not implemented yet." );
         } else if( !uriShouldBeSkipped( uri) ) {
             return fetchExternalGmlObject( uri, baseURL );
         } else {
-            LOG.info( "URL " + uri + " is configured to be skipped" );
+            LOG.debug( "URL " + uri + " is configured to be skipped" );
         }
         return null;
     }
