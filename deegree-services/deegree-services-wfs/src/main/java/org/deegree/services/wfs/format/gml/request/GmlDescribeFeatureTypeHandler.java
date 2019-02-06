@@ -56,7 +56,6 @@ import static org.deegree.protocol.wfs.WFSConstants.WFS_PREFIX;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -76,6 +75,7 @@ import org.apache.axiom.util.base64.Base64EncodingStringBufferOutputStream;
 import org.deegree.commons.ows.exception.OWSException;
 import org.deegree.commons.tom.ows.Version;
 import org.deegree.commons.utils.URITranslator;
+import org.deegree.commons.xml.schema.WellKnownSchemaManager;
 import org.deegree.feature.persistence.FeatureStore;
 import org.deegree.feature.types.AppSchema;
 import org.deegree.feature.types.FeatureType;
@@ -111,12 +111,8 @@ public class GmlDescribeFeatureTypeHandler extends AbstractGmlRequestHandler {
 
     private static final String APPSCHEMAS = "appschemas";
 
-    private static final String OGC_SCHEMA_HOST = "http://schemas.opengis.net";
-
     // URL of workspace appschema directory
     private String wsAppSchemaBaseURL;
-
-    private String ogcSchemaJarBaseURL;
 
     /**
      * Creates a new {@link GmlDescribeFeatureTypeHandler} instance.
@@ -132,12 +128,6 @@ public class GmlDescribeFeatureTypeHandler extends AbstractGmlRequestHandler {
             this.wsAppSchemaBaseURL = appSchemaBaseDir.toURI().toURL().toString();
         } catch ( MalformedURLException e ) {
             throw new RuntimeException( e );
-        }
-        URL baseUrl = DescribeFeatureType.class.getResource( "/META-INF/SCHEMAS_OPENGIS_NET" );
-        if ( baseUrl != null ) {
-            this.ogcSchemaJarBaseURL = baseUrl.toString();
-            LOG.debug( "GmlDescribeFeatureTypeHandler OGC Schema Jar Base URL: '" + this.ogcSchemaJarBaseURL + "'" );
-
         }
     }
 
@@ -310,8 +300,8 @@ public class GmlDescribeFeatureTypeHandler extends AbstractGmlRequestHandler {
     private void exportOriginalInfoSet( XMLStreamWriter writer, GMLSchemaInfoSet infoSet, String targetNs )
                             throws XMLStreamException {
         LOG.debug( "Exporting wrapper schema for original infoset." );
+
         GMLAppSchemaWriter.export( writer, infoSet, targetNs, new URITranslator() {
-            @SuppressWarnings("synthetic-access")
             @Override
             public String translate( String uri ) {
                 if ( uri.startsWith( wsAppSchemaBaseURL ) ) {
@@ -321,38 +311,14 @@ public class GmlDescribeFeatureTypeHandler extends AbstractGmlRequestHandler {
                     }
                     return options.getAppSchemaBaseURL() + "/" + relativePath;
                 }
-                if ( uri.startsWith( ogcSchemaJarBaseURL ) ) {
-                    return translateOGCSchemaLocation( uri );
+                String unredirectedUri = WellKnownSchemaManager.undirect( uri );
+                if (unredirectedUri != null) {
+                    return unredirectedUri;
                 }
+                LOG.error( "Exporting schema URI that wasn't processed by the WellKnownSchemaManager: " + unredirectedUri );
                 return uri;
             }
         } );
-    }
-
-    /**
-     * Helper method to translate the internal URI given into a remote OGC Schema location. This method ensures there's
-     * a starting "/" in the path.
-     * 
-     * @param uri
-     *            The URI String to translate
-     * @return The "remote" OGC Schema location.
-     */
-    private String translateOGCSchemaLocation( String uri ) {
-
-        StringBuilder ogcSchemaLocation = new StringBuilder( OGC_SCHEMA_HOST );
-        String ogcSchemaPath = uri.substring( ogcSchemaJarBaseURL.length() );
-        if ( !ogcSchemaPath.startsWith( "/" ) ) {
-            ogcSchemaLocation.append( "/" );
-            LOG.debug( "OGC Schema path from internal Jar did not include starting '/'. Path: '" + ogcSchemaPath
-                       + "'. Prefixed with '/' to complete URL...." );
-        }
-        ogcSchemaLocation.append( ogcSchemaPath );
-
-        LOG.debug( "Translated OGC Schema Jar URL to schemaLocation: '" + ogcSchemaLocation + "'" );
-
-        return ogcSchemaLocation.toString();
-        // Old behaviour
-        // return "http://schemas.opengis.net" + uri.substring( ogcSchemaJarBaseURL.length() );
     }
 
     private void writeWFSSchema( XMLStreamWriter writer, Version version, GMLVersion gmlVersion )

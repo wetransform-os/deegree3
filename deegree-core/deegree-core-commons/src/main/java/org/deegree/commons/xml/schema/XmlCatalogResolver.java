@@ -1,6 +1,8 @@
 package org.deegree.commons.xml.schema;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.xerces.util.XMLCatalogResolver;
 import org.apache.xerces.xni.XMLResourceIdentifier;
@@ -25,6 +27,8 @@ public class XmlCatalogResolver implements XMLEntityResolver {
 
     private final XMLCatalogResolver resolver;
 
+    private Map<String,String> redirectedSystemIdToUnresolvedSystemId = new HashMap<>() ;
+
     XmlCatalogResolver( XMLCatalogResolver resolver ) {
         this.resolver = resolver;
         String ogcSchemasBaseUrl = XMLCatalogResolver.class.getResource( "/META-INF/SCHEMAS_OPENGIS_NET" ).toString();
@@ -42,6 +46,7 @@ public class XmlCatalogResolver implements XMLEntityResolver {
         String resolvedId = resolver.resolveIdentifier( resourceIdentifier );
         if ( resolvedId != null ) {
             resolvedId = resolvedId.replace( OGCSCHEMAS_PROTOCOL, ogcSchemasBaseUrl );
+            redirectedSystemIdToUnresolvedSystemId.put( resolvedId, resourceIdentifier.getLiteralSystemId() );
             return new XMLInputSource( resourceIdentifier.getPublicId(), resolvedId,
                                        resourceIdentifier.getBaseSystemId() );
         }
@@ -59,8 +64,24 @@ public class XmlCatalogResolver implements XMLEntityResolver {
         String resolvedId = resolver.resolveSystem( systemId );
         if ( resolvedId != null ) {
             resolvedId = resolvedId.replace( OGCSCHEMAS_PROTOCOL, ogcSchemasBaseUrl );
+            redirectedSystemIdToUnresolvedSystemId.put( resolvedId, systemId );
         }
         return resolvedId;
+    }
+
+    /**
+     * Returns the original system id for the given resolved system id.
+     * <p>
+     * This only works for system ids that have been resolved by this instance, i.e. that have either been returned by
+     * {@link #resolveEntity(XMLResourceIdentifier)} or by {@link #resolveSystem(String)}.
+     * </p>
+     *
+     * @param resolvedSystemId
+     *                             resolved system id
+     * @return original (unresolved) system id
+     */
+    public String unresolveSystem( String resolvedSystemId ) {
+        return redirectedSystemIdToUnresolvedSystemId.get(resolvedSystemId);
     }
 
 }
