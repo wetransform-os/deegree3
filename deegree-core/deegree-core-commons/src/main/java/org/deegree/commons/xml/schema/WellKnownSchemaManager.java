@@ -21,6 +21,7 @@ import org.apache.xerces.parsers.XMLGrammarPreparser;
 import org.apache.xerces.util.SymbolTable;
 import org.apache.xerces.util.XMLCatalogResolver;
 import org.apache.xerces.util.XMLGrammarPoolImpl;
+import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.grammars.XMLGrammarPool;
 import org.apache.xerces.xni.parser.XMLInputSource;
@@ -125,6 +126,21 @@ public class WellKnownSchemaManager implements Initializable {
             return systemId;
         }
         return resolved;
+    }
+
+    /**
+     * Returns the original system id for the given redirected system id.
+     * <p>
+     * This only works for system ids that have been redirected, i.e. that have either been returned by
+     * {@link #redirect(String)} or by the underlying {@link XmlCatalogResolver}.
+     * </p>
+     *
+     * @param redirectedSystemId
+     *                               redirected system id
+     * @return original (unredirected) system id
+     */
+    public static String undirect( String redirectedSystemId ) {
+        return getInstance().getCatalogResolver().unresolveSystem( redirectedSystemId );
     }
 
     @Override
