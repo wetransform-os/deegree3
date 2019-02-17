@@ -40,7 +40,7 @@ import static java.util.Collections.emptyList;
 import static org.deegree.commons.ows.exception.OWSException.NOT_FOUND;
 import static org.deegree.commons.ows.exception.OWSException.NO_APPLICABLE_CODE;
 import static org.deegree.commons.tom.ows.Version.parseVersion;
-import static org.deegree.services.controller.DeegreeWorkspaceUpdater.INSTANCE;
+import static org.deegree.services.controller.DeegreeWorkspaceUpdater.UPDATER;
 import static org.reflections.util.ClasspathHelper.forClassLoader;
 import static org.reflections.util.ClasspathHelper.forWebInfLib;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -1085,7 +1085,7 @@ public class OGCFrontController extends HttpServlet {
             LOG.info( "" );
 
             initWorkspace();
-            DeegreeWorkspaceUpdater.INSTANCE.init( workspace );
+            DeegreeWorkspaceUpdater.UPDATER.init( workspace );
 
         } catch ( NoClassDefFoundError e ) {
             LOG.error( "Initialization failed!" );
@@ -1208,18 +1208,21 @@ public class OGCFrontController extends HttpServlet {
      */
     public synchronized void update( boolean forceReload )
                             throws IOException, URISyntaxException, ServletException {
-        if ( forceReload || INSTANCE.isWorkspaceChange(getActiveWorkspace()) ) {
+        DeegreeWorkspace activeWorkspace = getActiveWorkspace();
+        boolean isWorkspaceChange = UPDATER.isWorkspaceChange( activeWorkspace );
+        if ( forceReload || isWorkspaceChange ) {
             // do complete reload
             destroyWorkspace();
             try {
                 initWorkspace();
             } catch ( ResourceInitException e ) {
                 throw new ServletException( e.getLocalizedMessage(), e.getCause() );
+            } finally {
+                UPDATER.setWorkspace( workspace );
             }
-            INSTANCE.notifyWorkspaceChange( workspace );
         } else {
             // no complete reload - update only
-            INSTANCE.updateWorkspace( workspace );
+            UPDATER.updateWorkspace( workspace );
         }
     }
 
