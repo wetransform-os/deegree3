@@ -36,6 +36,7 @@ import org.deegree.workspace.ResourceProvider;
 import org.deegree.workspace.ResourceStates;
 import org.deegree.workspace.ResourceStates.ResourceState;
 import org.deegree.workspace.Workspace;
+import org.deegree.workspace.graph.ResourceGraph;
 import org.deegree.workspace.graph.ResourceNode;
 import org.deegree.workspace.standard.DefaultResourceIdentifier;
 import org.deegree.workspace.standard.DefaultResourceLocation;
@@ -191,6 +192,8 @@ public class DeegreeWorkspaceUpdater {
             notPrepared.addAll( prepareResources( preparedResources, filesModified ) );
 
             // 3. initialize prepared resources and reinitialize dependent resources
+            // rebuild dependencies due to changes in step 1 and 2
+            workspace.getDependencyGraph().updateDependencies();
             final Set<File> notInitialized = initResources( workspace, preparedResources );
 
             if ( notPrepared.size() + notDestroyed.size() + notInitialized.size() > 0 ) {
@@ -243,16 +246,19 @@ public class DeegreeWorkspaceUpdater {
     }
 
     private Set<File> initResources( Workspace workspace, PreparedResources preparedResources ) {
+
+        ResourceGraph dependencyGraph = workspace.getDependencyGraph();
         Set<File> errorFiles = new HashSet<>();
         Set<ResourceIdentifier<Resource>> dependents = new LinkedHashSet<>();
-        for ( ResourceMetadata<?> md : workspace.getDependencyGraph().toSortedList() ) {
+
+        for ( ResourceMetadata<?> md : dependencyGraph.toSortedList() ) {
             ResourceIdentifier<?> resourceId = md.getIdentifier();
             ResourceStates states = workspace.getStates();
             ResourceState state = states.getState( md.getIdentifier() );
             if ( state == ResourceState.Prepared ) {
                 try {
                     workspace.init( resourceId, preparedResources );
-                    collectDependents( dependents, workspace.getDependencyGraph().getNode( resourceId ) );
+                    collectDependents( dependents, dependencyGraph.getNode( resourceId ) );
                     dependents.remove( resourceId );
                 } catch ( Exception e ) {
                     LOG.error( e.getMessage(), e );
@@ -263,9 +269,13 @@ public class DeegreeWorkspaceUpdater {
                 }
             }
         }
-        LOG.debug( "Reinitializing dependent resources: " + dependents );
+
+        // TODO reinitialize dependent resources in order (ResourceGraph?)
+        if ( !dependents.isEmpty() ) {
+            LOG.info( "Reinitializing dependent resources: " + dependents );
+        }
         for ( ResourceIdentifier<Resource> id : dependents ) {
-            ResourceMetadata<Resource> md = workspace.getDependencyGraph().getNode( id ).getMetadata();
+            ResourceMetadata<Resource> md = dependencyGraph.getNode( id ).getMetadata();
             try {
                 workspace.destroyAndShutdownDependents( md.getIdentifier() );
                 workspace.add( md.getLocation() );
