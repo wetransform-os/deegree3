@@ -35,6 +35,7 @@
  ----------------------------------------------------------------------------*/
 package org.deegree.commons.xml.jaxb;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.InputStream;
@@ -89,6 +90,8 @@ public class JAXBUtils {
         } catch ( Exception e ) {
             LOG.error( "Error in configuration file: {}", e.getLocalizedMessage() );
             LOG.error( "Hint: Try validating the file with an XML-schema aware editor." );
+        } finally {
+            closeQuietly( input );
         }
         return o;
     }
