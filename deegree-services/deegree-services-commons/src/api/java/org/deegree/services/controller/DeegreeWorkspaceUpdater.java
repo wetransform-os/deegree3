@@ -45,7 +45,7 @@ public class DeegreeWorkspaceUpdater {
 
     private static final Logger LOG = getLogger( DeegreeWorkspaceUpdater.class );
 
-    public final static DeegreeWorkspaceUpdater INSTANCE = new DeegreeWorkspaceUpdater();
+    public final static DeegreeWorkspaceUpdater UPDATER = new DeegreeWorkspaceUpdater();
 
     private final XMLInputFactory xmlInputFactory;
 
@@ -78,14 +78,13 @@ public class DeegreeWorkspaceUpdater {
         final File newLocation = newWorkspace.getLocation();
         if ( newLocation.equals( lastWorkspaceLocation ) )
             return false;
-        lastWorkspaceLocation = newLocation;
-        this.workspace = newWorkspace.getNewWorkspace();
         return true;
     }
 
-    public void notifyWorkspaceChange( DeegreeWorkspace workspace ) {
+    public void setWorkspace( DeegreeWorkspace workspace ) {
         // remember file status
-        LOG.info( "Workspace change" );
+        LOG.info( "Set Workspace" );
+        this.workspace = workspace.getNewWorkspace();
         updateFileStatusMap( workspace.getLocation() );
     }
 
