@@ -69,7 +69,7 @@ public class MultiResolutionRaster extends AbstractCoverage {
 
     private static final Logger LOG = LoggerFactory.getLogger( MultiResolutionRaster.class );
 
-    private List<AbstractRaster> resolutions = new LinkedList<AbstractRaster>();
+    private final List<AbstractRaster> resolutions = new LinkedList<AbstractRaster>();
 
     private ResolutionInfo resolutionInfo;
 
@@ -203,6 +203,13 @@ public class MultiResolutionRaster extends AbstractCoverage {
     @Override
     public void init() {
         // nothing to do
+    }
+
+    @Override
+    public void destroy() {
+        for ( AbstractRaster res : resolutions ) {
+            res.destroy();
+        }
     }
 
 }

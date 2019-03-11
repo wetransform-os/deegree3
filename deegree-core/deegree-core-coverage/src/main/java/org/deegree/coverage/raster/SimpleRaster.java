@@ -43,7 +43,6 @@ import org.deegree.coverage.raster.geom.RasterGeoReference;
 import org.deegree.coverage.raster.geom.RasterGeoReference.OriginLocation;
 import org.deegree.coverage.raster.geom.RasterRect;
 import org.deegree.geometry.Envelope;
-import org.deegree.workspace.Resource;
 import org.deegree.workspace.ResourceMetadata;
 
 /**
@@ -310,6 +309,11 @@ public class SimpleRaster extends AbstractRaster {
     @Override
     public void init() {
         // nothing to do
+    }
+
+    @Override
+    public void destroy () {
+        dispose();
     }
 
 }

@@ -74,6 +74,10 @@ import org.slf4j.Logger;
  */
 public class RasterCache {
 
+    // Disables the caching mechanism to workaround inherent memory leak issues
+    // TODO Remove class altogether or fix it properly
+    private static final boolean DISABLE_CACHE = true;
+
     private static final Logger LOG = getLogger( RasterCache.class );
 
     /**
@@ -485,7 +489,9 @@ public class RasterCache {
                 }
                 result = new CacheRasterReader( reader, cacheFile, this );
             }
-            addReader( result );
+            if ( !DISABLE_CACHE ) {
+                addReader( result );
+            }
         } else {
             LOG.debug( "Not adding reader to cache, because it is was null." );
         }
