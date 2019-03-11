@@ -521,7 +521,7 @@ public class DefaultWorkspace implements Workspace {
             res.destroy();
         }
         states.remove( id );
-        removeMetadataFromResourceManager( id );
+        removeMetadata( id );
         resources.remove( id );
         graph.removeNode( id );
         errors.clear( id );
@@ -542,7 +542,7 @@ public class DefaultWorkspace implements Workspace {
             res.destroy();
         }
         states.remove( id );
-        removeMetadataFromResourceManager( id );
+        removeMetadata( id );
         resources.remove( id );
         graph.removeNode( id );
         errors.clear( id );
@@ -567,7 +567,8 @@ public class DefaultWorkspace implements Workspace {
         errors.registerError( id, "Required dependency unavailable." );
     }
 
-    private void removeMetadataFromResourceManager( ResourceIdentifier<?> id ) {
+    private void removeMetadata( ResourceIdentifier<?> id ) {
+        resourceMetadata.remove( id );
         for ( ResourceManager<?> mgr : getResourceManagers() ) {
             for ( ResourceMetadata<?> md : mgr.getResourceMetadata() ) {
                 if ( md.getIdentifier() == id ) {
