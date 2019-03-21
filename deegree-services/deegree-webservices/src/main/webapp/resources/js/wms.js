@@ -96,21 +96,36 @@ var WMSUtils = {
   createOpenlayersMap: function(capabilities, layers, loc){
     var initialBox = WMSUtils.getBoundingBox(capabilities)
     var map = new OpenLayers.Map( 'map', {
-                                    projection: new OpenLayers.Projection("EPSG:900913"),
+                                    projection: 'EPSG:900913',
                                     units: "m",
                                     maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
                                     allOverlays: true
                                   } )
 
+
     var osmLayer = new OpenLayers.Layer.OSM("OpenStreetMap")
     map.addLayer(osmLayer)
 
+    var olLayers = []
     for(var i in layers){
       var layer = new OpenLayers.Layer.WMS( layers[i], loc, {layers: layers[i], transparent: true}, {singleTile: true})
       layer.setName(layers[i])
       layer.setVisibility(false)
       map.addLayer(layer)
+      olLayers.push(layer)
     }
+
+    var gfi
+
+    map.addControl(gfi = new OpenLayers.Control.WMSGetFeatureInfo({
+        layers: olLayers,
+        drillDown: true
+    }))
+    gfi.activate()
+    gfi.events.register('getfeatureinfo', WMSUtils, function(event) {
+        var popup = new OpenLayers.Popup('chicken', event.xy, new OpenLayers.Size(500, 500), event.text, true)
+        map.addPopup(popup)
+    })
 
     map.setCenter(new OpenLayers.LonLat(0, 0), 0)
     map.addControl(new OpenLayers.Control.LayerSwitcher())
