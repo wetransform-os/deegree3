@@ -39,6 +39,7 @@ import static org.deegree.services.config.actions.Crs.checkCrs;
 import static org.deegree.services.config.actions.Crs.getCodes;
 import static org.deegree.services.config.actions.Crs.listCrs;
 import static org.deegree.services.config.actions.Delete.delete;
+import static org.deegree.services.config.actions.DependencyGraph.dependencyGraph;
 import static org.deegree.services.config.actions.Download.download;
 import static org.deegree.services.config.actions.Invalidate.invalidate;
 import static org.deegree.services.config.actions.List.list;
@@ -56,7 +57,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.deegree.services.config.actions.Update;
 import org.slf4j.Logger;
 
 /**
@@ -86,6 +86,7 @@ public class ConfigServlet extends HttpServlet {
             StringBuilder data = new StringBuilder( "No action specified.\n\nAvailable actions:\n" );
             data.append( "GET /config/download[/path]                                  - download currently running workspace or file in workspace\n" );
             data.append( "GET /config/download/wsname[/path]                           - download workspace with name <wsname> or file in workspace\n" );
+            data.append( "GET /config/dependencygraph                                  - return resource states and dependencies\n" );
             data.append( "GET /config/restart                                          - restart currently running workspace\n" );
             data.append( "GET /config/restart[/path]                                   - restarts all resources connected to the specified one\n" );
             data.append( "GET /config/restart/wsname                                   - restart with workspace <wsname>\n" );
@@ -124,6 +125,11 @@ public class ConfigServlet extends HttpServlet {
 
     private void dispatch( String path, HttpServletRequest req, HttpServletResponse resp )
                             throws IOException, ServletException {
+
+        if ( path.toLowerCase().startsWith( "/dependencygraph" ) ) {
+            dependencyGraph( path.substring( 16 ), resp );
+        }
+
         if ( path.toLowerCase().startsWith( "/download" ) ) {
             download( path.substring( 9 ), resp );
         }
