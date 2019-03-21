@@ -14,7 +14,7 @@ import org.apache.xerces.xni.grammars.Grammar;
 import org.apache.xerces.xni.grammars.XMLGrammarPool;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLInputSource;
-import org.deegree.commons.xml.schema.RedirectingEntityResolver;
+import org.deegree.commons.xml.schema.WellKnownSchemaManager;
 
 public class GrammarUtil {
 
@@ -99,7 +99,7 @@ public class GrammarUtil {
         if ( errorHandler != null ) {
             grammerParser.setErrorHandler( errorHandler );
         }
-        grammerParser.setEntityResolver( new RedirectingEntityResolver() );
+        grammerParser.setEntityResolver( WellKnownSchemaManager.getInstance().getCatalogResolver() );
         return grammerParser.preparseGrammar( "http://www.w3.org/2001/XMLSchema", new XMLInputSource( baseUri, baseUri,
                                                                                                       baseUri, in,
                                                                                                       encoding ) );
