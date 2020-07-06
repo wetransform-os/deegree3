@@ -4,7 +4,7 @@
   <groupId>org.deegree</groupId>
   <artifactId>deegree</artifactId>
   <packaging>pom</packaging>
-  <version>3.4.3</version>
+  <version>3.4.4</version>
   <name>deegree</name>
   <description>Framework for OGC Web Service implementations and geospatial applications</description>
   <url>http://www.deegree.org/</url>
@@ -13,7 +13,7 @@
     <connection>scm:git:git@github.com:deegree/deegree3.git</connection>
     <developerConnection>scm:git:git@github.com:deegree/deegree3.git</developerConnection>
     <url>https://github.com/deegree/deegree3</url>
-    <tag>deegree-3.4.3</tag>
+    <tag>deegree-3.4.4</tag>
   </scm>
 
   <repositories>
@@ -732,9 +732,9 @@
         <version>2.2.1</version>
       </dependency>
       <dependency>
-        <groupId>postgresql</groupId>
+        <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>9.1-901-1.jdbc4</version>
+        <version>42.2.5</version>
       </dependency>
       <!-- Oracle -->
       <dependency>
@@ -1082,7 +1082,7 @@
     <buildTimestamp>${maven.build.timestamp}</buildTimestamp>
     <java.version>1.8</java.version>
     <site.dir>${user.home}/Sites</site.dir>
-    <deegree-maven-plugin.version>1.20</deegree-maven-plugin.version>
+    <deegree-maven-plugin.version>2.0.2</deegree-maven-plugin.version>
   </properties>
 
   <modules>
