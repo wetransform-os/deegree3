@@ -27,6 +27,11 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 
 EXPOSE 8080
 
+RUN apt-get update && apt-get install -y cron
+
+COPY clean-deegree-tmp /etc/cron.daily
+RUN chmod 0744 /etc/cron.daily/clean-deegree-tmp
+
 # set default secrets ( override for production use! )
 # consoleSecretKey="deegree"
 ENV consoleSecretKey=000001544E797221:564344F65B8F9DDBA6A410E461E7801E10955F56D8679284966F400C68B6CEAB 
