@@ -1,4 +1,4 @@
-FROM java:8-jdk as builder
+FROM openjdk:8-jdk as builder
 # Multi stage build - https://docs.docker.com/engine/userguide/eng-image/multistage-build/
 
 # install maven
